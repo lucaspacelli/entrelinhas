@@ -2,52 +2,52 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Cadastro de Pacientes</title>
+  <title>Agenda de Sessões</title>
   <link href="ico.png" rel="icon" type="image/x-icon"/>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <p>Carregando cadastros...</p>
+        <p>Carregando agenda...</p>
       </div>
-          
-  <h2>Cadastros</h2>
-      <a href="agenda.html">
-    <button>Agenda</button>
+
+  <h1>Agenda</h1>
+        <a href="cadastros.html">
+    <button>Cadastros</button>
   </a>
-  <div id="loading" style="display: none;">Carregando...</div>
-  <button id="btnNovo" onclick="novoCadastro()">Novo Cadastro</button>
-  <table id="tabela">
+  <div id="containerAgenda" style="display: none;"></div>
+  <button id="btnNovo" onclick="novoAgendamento()">Novo Agendamento</button>
+  <table id="tabelaAgenda">
     <thead>
       <tr>
-        <th>ID</th>
         <th>Paciente</th>
-        <th>Valor</th>
-        <th>Data do Reajuste</th>
-        <th>Situação</th>
-        <th>Ações</th>
+        <th>Sessão</th>
+        <th>Pagamento</th>
+        <th>Prontuário</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <!-- Modal de Cadastro -->
-  <div id="modal" class="modal">
+<!-- Modal de Edição da Agenda -->
+<div id="modalAgenda" class="modal">
     <div class="modal-content">
-      <span class="close" onclick="fecharModal()">&times;</span>
-      <h2 id="modalTitulo">Novo Cadastro</h2>
-      <form id="formCadastro">
-        <input type="hidden" id="inputId">
-        <label>Paciente: <input type="text" id="inputPaciente" required></label>
-        <label>Valor: <input type="text" id="inputValor" required></label>
-        <label>Data de Reajuste: <input type="date" id="inputData" required></label>
-        <label>Situação: <input type="text" id="inputSituacao" required></label>
+      <span class="close" onclick="fecharModalAgenda()">&times;</span>
+      <h2>Editar Compromisso</h2>
+      <form id="formAgenda">
+        <input type="hidden" id="agendaIndex">
+        <label>Paciente: <input type="text" id="agendaPaciente" required></label>
+        <label>Sessão: <input type="text" id="agendaSessao" required></label>
+        <label>Pagamento: <input type="text" id="agendaPagamento" required></label>
+        <label>Prontuário:
+            <textarea id="agendaProntuario" rows="30" style="resize: vertical;" required></textarea>
+          </label>
         <button type="submit">Salvar</button>
       </form>
     </div>
   </div>
-
+  
   <script src="script.js"></script>
 </body>
 </html>
