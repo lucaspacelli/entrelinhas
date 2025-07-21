@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agenda de Sessões</title>
+  <link href="ico.png" rel="icon" type="image/x-icon"/>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Carregando agenda...</p>
+  </div>
+
+  <div class="card header-card">
+    <h1>Agenda</h1>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a href="cadastros.html"><button>Cadastros</button></a>
+      <button id="btnNovo" onclick="novoAgendamento()">Novo Agendamento</button>
+    </div>
+  </div>
+  
+  <div id="containerAgenda" style="display: none;">
+    <div id="cardsContainer" class="cards-grid"></div>
+  </div>
+
+  <!-- Modal de Edição da Agenda -->
+  <div id="modalAgenda" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModalAgenda()">&times;</span>
+      <h2>Editar Compromisso</h2>
+      <form id="formAgenda">
+        <input type="hidden" id="agendaIndex">
+        <label>Paciente:
+          <input type="text" id="agendaPaciente" required>
+        </label>
+        <label>Sessão:
+          <input type="text" id="agendaSessao" required>
+        </label>
+        <label>Pagamento:
+          <input type="text" id="agendaPagamento">
+        </label>
+        <label>Prontuário:
+          <textarea id="agendaProntuario" rows="10" style="resize: vertical;"></textarea>
+        </label>
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
