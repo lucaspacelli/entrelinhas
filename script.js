@@ -18,11 +18,33 @@ function preencherCardsAgenda(agenda) {
   const container = document.getElementById('cardsContainer');
   container.innerHTML = '';
 
+  // Ordena por data
+  agenda.sort((a, b) => {
+    const parseData = (dataStr) => {
+      if (!dataStr) return new Date(0);
+      const [dia, mes, resto] = dataStr.split('/');
+      if (!dia || !mes || !resto) return new Date(0);
+      const [ano, hora = '00:00'] = resto.split(' ');
+      const [hh, mm] = hora.split(':');
+      return new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
+    };
+    return parseData(a.Sessão) - parseData(b.Sessão);
+  });
+
   agenda.forEach((item, index) => {
     const prontuarioId = `prontuario-${index}`;
-
     const card = document.createElement('div');
     card.className = 'card';
+
+    // Verifica se está no passado
+    const [dia, mes, resto] = item.Sessão.split('/');
+    const [ano, hora = '00:00'] = resto.split(' ');
+    const [hh, mm] = hora.split(':');
+    const dataAgendamento = new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
+    const agora = new Date();
+    if (!isNaN(dataAgendamento.getTime()) && dataAgendamento < agora) {
+      card.classList.add('passado');
+    }
 
     card.innerHTML = `
       <h3>${item.Paciente}</h3>
@@ -30,7 +52,7 @@ function preencherCardsAgenda(agenda) {
       <p><strong>Pagamento:</strong> ${item.Pagamento}</p>
       <button onclick="mostrarProntuario('${prontuarioId}')">Ver Prontuário</button>
       <button onclick="editarAgenda(${index})">Editar compromisso</button>
-      <button onclick="excluirAgenda(${index})" style="background-color: #FFA2A2;">Excluir</button>
+      <button onclick="excluirAgenda(${index})">Excluir</button>
       <div id="${prontuarioId}" style="display:none; margin-top:10px;"><strong>Prontuário:</strong><br>${item.Prontuário}</div>
     `;
 
@@ -78,6 +100,33 @@ document.getElementById("formAgenda").addEventListener("submit", function (e) {
     url = `${API_URL}?action=updateAgenda&index=${index}&paciente=${encodeURIComponent(paciente)}&sessao=${encodeURIComponent(sessao)}&pagamento=${encodeURIComponent(pagamento)}&prontuario=${encodeURIComponent(prontuario)}`;
   }
 
+  // Validação de conflito de horário
+  const [dia, mes, resto] = sessao.split('/');
+  const [ano, hora = '00:00'] = resto.split(' ');
+  const [hh, mm] = hora.split(':');
+  const novaData = new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
+
+  if (isNaN(novaData.getTime())) {
+    alert("Data inválida.");
+    return;
+  }
+
+  const existeConflito = window._agendaData.some((item, i) => {
+    if (i == index) return false;
+    const [d, m, r] = item.Sessão.split('/');
+    const [y, h = '00:00'] = r.split(' ');
+    const [h1, m1] = h.split(':');
+    const dataExistente = new Date(Number(y), Number(m) - 1, Number(d), Number(h1), Number(m1));
+    if (isNaN(dataExistente.getTime())) return false;
+    const diffMs = Math.abs(novaData - dataExistente);
+    return diffMs < 60 * 60 * 1000;
+  });
+
+  if (existeConflito) {
+    alert("Já existe uma sessão marcada neste horário.");
+    return;
+  }
+
   fetch(url).then(() => {
     fecharModalAgenda();
     carregarAgenda();
@@ -93,10 +142,8 @@ function mostrarProntuario(id) {
 function novoAgendamento() {
   document.getElementById("formAgenda").reset();
   document.getElementById('agendaIndex').value = '';
-
   document.getElementById('agendaPagamento').closest('label').style.display = 'none';
   document.getElementById('agendaProntuario').closest('label').style.display = 'none';
-
   document.getElementById('modalAgenda').style.display = 'block';
 }
 
