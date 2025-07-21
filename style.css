@@ -212,6 +212,12 @@ th {
   margin-bottom: 20px;
 }
 
+.card.passado {
+  opacity: 0.6;
+  filter: grayscale(0.3);  
+  border-left: 5px solid #999;
+}
+
 /* Responsividade */
 @media (max-width: 600px) {
   h1 {
