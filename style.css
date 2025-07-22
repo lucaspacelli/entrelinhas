@@ -309,3 +309,14 @@ button.btn-excluir:hover {
     height: auto;
   }
 }
+
+@media print {
+  .header-card {
+    position: static !important;
+    page-break-after: always;
+  }
+
+  .header-card ~ * {
+    page-break-inside: avoid;
+  }
+}
