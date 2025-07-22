@@ -1,14 +1,22 @@
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
-  background-image: url(cover.png);
+  padding-top: 160px;
   overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.1);
+  z-index: -1;
 }
 
 h1 {
   margin-bottom: 10px;
   padding: 5px;
-  color: #333;
+  color: darkslategrey;
   border-radius: 8px;
   width: fit-content;
 }
@@ -16,9 +24,8 @@ h1 {
 h2 {
   margin-bottom: 10px;
   padding: 5px;
-  color: #333;
+  color: darkslategrey;
   border-radius: 8px;
-  background-color: #E9ECEF;
   width: fit-content;
 }
 
@@ -39,7 +46,7 @@ button:hover {
 
 #btnNovo {
   margin-bottom: 10px;
-  background-color: green;
+  background-color: darkslategrey;
 }
 
 td button {
@@ -82,29 +89,30 @@ th {
   display: none;
   position: fixed;
   z-index: 999;
-  padding-top: 100px;
+  margin-top: 180px;
   left: 0; top: 0;
   width: 100%; height: 100%;
   overflow: auto;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0,0,0,0.3);
 }
 
 .modal-content {
   background-color: #fff;
   margin: auto;
-  padding: 20px;
+  padding: 10px;
   border-radius: 6px;
   width: 90%;
-  max-width: 900px;
+  max-width: 1000px;
   height: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .modal-content label {
   display: flex;
   flex-direction: column;
+  padding: 5px;
 }
 
 .modal-content input,
@@ -121,6 +129,17 @@ th {
 .close {
   align-self: flex-end;
   font-size: 24px;
+  cursor: pointer;
+  color: salmon;
+}
+
+buttonn {
+  background-color: teal;
+  color: white;
+  padding: 8px;
+  margin-top: 5px;
+  margin-left: 5px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
@@ -177,7 +196,7 @@ th {
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid #86B8C2;
+  border-left: 5px solid teal;
   display: flex;
   flex-direction: column;
   width: 98%;
@@ -186,36 +205,77 @@ th {
 .card h3 {
   margin: 0 0 5px;
   font-size: 18px;
+  color: #333;
 }
 
 .card p {
   margin: 2px 0;
+  color: #333;
 }
 
 .card button {
   align-self: flex-start;
   margin-top: 8px;
-  background-color: #86B8C2;
+  background-color: teal;
 }
 
-/* Header responsivo com botões */
+.card button:hover {
+  align-self: flex-start;
+  margin-top: 8px;
+  background-color: lightseagreen;
+}
+
+button.btn-excluir {
+  align-self: flex-start;
+  margin-top: 8px;
+  margin-left: 2px;
+  background-color: lightcoral;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: small;
+}
+
+button.btn-excluir:hover {
+  background-color: #e04b4b;
+}
+
 .header-card {
-  background-color: #fff;
-  padding: 15px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-image: url(cover.png);
+  background-size: contain;
+  background-position: right;
+  background-repeat: no-repeat;
+  width: 100%;
   border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  border-left: 0px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
   display: flex;
   flex-wrap: wrap;
   align-items: left;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.header-card button {
+  align-self: flex-start;
+  margin-top: 8px;
+  background-color: teal;
 }
 
 .card.passado {
-  opacity: 0.6;
-  filter: grayscale(0.3);  
+  filter: grayscale(0.7);  
   border-left: 5px solid #999;
+}
+
+.card.cancelado {
+  filter: grayscale(0.1);
+  border-left: 5px solid #d98c8c;
 }
 
 /* Responsividade */
