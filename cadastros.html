@@ -8,17 +8,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">  
 </head>
 <body>
-    <div id="loadingOverlay">
-        <div class="spinner"></div>
-        <p>Carregando cadastros...</p>
-      </div>
-          
-  <h2>Cadastros</h2>
-      <a href="index.html">
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Carregando cadastros...</p>
+  </div>
+        
+  <h2><img src="ico.png" style="width: 50px; vertical-align: middle;"> Cadastros</h2>
+  <a href="index.html">
     <button>Agenda</button>
   </a>
   <div id="loading" style="display: none;">Carregando...</div>
   <button id="btnNovo" onclick="novoCadastro()">Novo Cadastro</button>
+
   <table id="tabela">
     <thead>
       <tr>
@@ -27,6 +28,7 @@
         <th>Valor</th>
         <th>Data do Reajuste</th>
         <th>Situação</th>
+        <th>Telefone</th>
         <th>Ações</th>
       </tr>
     </thead>
@@ -44,6 +46,7 @@
         <label>Valor: <input type="text" id="inputValor" required></label>
         <label>Data de Reajuste: <input type="date" id="inputData" required></label>
         <label>Situação: <input type="text" id="inputSituacao" required></label>
+        <label>Telefone: <input type="text" id="inputTelefone"></label>
         <button type="submit">Salvar</button>
       </form>
     </div>
