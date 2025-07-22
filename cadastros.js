@@ -1,9 +1,9 @@
-const API_URL ='https://script.google.com/macros/s/AKfycbxuq9G3NhqzVQVyevBheBhkCw355ciOuooQVfKNkrUAI24nkj6jGU1eACGmLk-_SxLt/exec'; // v13
+const API_URL = 'https://script.google.com/macros/s/AKfycbyQV7CIT1wV7DKdvojIQnsMZFHKYzCGrqKViLaq7akYmazVzF38UtJGVztl6Wl0ijlK/exec'; // v17
 
 let editandoId = null;
 
 async function carregar() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
+  document.getElementById('loadingOverlay').style.display = 'flex';
 
   try {
     const res = await fetch(API_URL); // sem parâmetros = listar todos
@@ -29,6 +29,7 @@ function preencherTabela(dados) {
       <td>${p.Valor}</td>
       <td>${p['Data de reajuste']}</td>
       <td>${p.Situação}</td>
+      <td>${p.Telefone || ''}</td>
       <td>
         <button onclick="editarCadastro(${p.ID})">Editar</button>
         <button onclick="excluirCadastro(${p.ID})">Excluir</button>
@@ -58,6 +59,7 @@ function editarCadastro(id) {
   document.getElementById("inputValor").value = linha.children[2].textContent;
   document.getElementById("inputData").value = formatarDataISO(linha.children[3].textContent);
   document.getElementById("inputSituacao").value = linha.children[4].textContent;
+  document.getElementById("inputTelefone").value = linha.children[5]?.textContent || '';
 
   abrirModal();
 }
@@ -86,8 +88,9 @@ document.getElementById("formCadastro").addEventListener("submit", function (e) 
   const valor = document.getElementById("inputValor").value;
   const data = document.getElementById("inputData").value;
   const situacao = document.getElementById("inputSituacao").value;
+  const telefone = document.getElementById("inputTelefone").value;
 
-  let url = `${API_URL}?action=${editandoId ? 'update' : 'create'}&paciente=${encodeURIComponent(paciente)}&valor=${valor}&data=${data}&situacao=${situacao}`;
+  let url = `${API_URL}?action=${editandoId ? 'update' : 'create'}&paciente=${encodeURIComponent(paciente)}&valor=${valor}&data=${data}&situacao=${situacao}&telefone=${encodeURIComponent(telefone)}`;
 
   if (editandoId) {
     url += `&id=${editandoId}`;
