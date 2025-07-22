@@ -14,10 +14,10 @@
   </div>
 
   <div class="card header-card">
-    <h1>Agenda</h1>
+    <h1><img src="ico.png" style="width: 50px; vertical-align: middle;"> Agenda</h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
       <a href="cadastros.html"><button>Cadastros</button></a>
-      <button id="btnNovo" onclick="novoAgendamento()">Novo Agendamento</button>
+      <button id="btnNovo" onclick="novoAgendamento()"> + Novo Agendamento</button>
     </div>
   </div>
   
@@ -31,7 +31,7 @@
       <span class="close" onclick="fecharModalAgenda()">&times;</span>
       <h2>Editar Compromisso</h2>
       <form id="formAgenda">
-        <input type="hidden" id="agendaIndex">
+        <input type="hidden" id="agendaId"> <!-- atualizado -->
         <label>Paciente:
           <input type="text" id="agendaPaciente" required>
         </label>
@@ -44,7 +44,7 @@
         <label>Prontuário:
           <textarea id="agendaProntuario" rows="10" style="resize: vertical;"></textarea>
         </label>
-        <button type="submit">Salvar</button>
+        <button type="submit">Salvar</button> <!-- corrigido -->
       </form>
     </div>
   </div>
