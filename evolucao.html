@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Evolução do Paciente</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="ico.png" rel="icon" type="image/x-icon"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div class="header-card">
+    <h1><img src="ico.png" style="width: 50px; vertical-align: middle;"> Evolução do Paciente</h1>
+  </div>
+
+  <div class="botoes-header">
+    <a href="index.html"><button class="botao-azul">Agenda</button></a>
+    <a href="cadastros.html"><button>Cadastros</button></a>
+  </div>
+
+  <div class="card">
+    <label for="selectPaciente"><strong>Selecione o paciente:</strong></label>
+    <select id="selectPaciente" onchange="filtrarEvolucao()">
+      <option value="">-- Selecione --</option>
+    </select>
+  </div>
+
+  <div id="containerEvolucao" style="margin-top: 20px;"></div>
+
+  <script src="evolucao.js"></script>
+</body>
+</html>
