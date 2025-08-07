@@ -1,54 +1,50 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbyQV7CIT1wV7DKdvojIQnsMZFHKYzCGrqKViLaq7akYmazVzF38UtJGVztl6Wl0ijlK/exec'; // v17
+const API_URL = 'https://script.google.com/macros/s/AKfycbyQV7CIT1wV7DKdvojIQnsMZFHKYzCGrqKViLaq7akYmazVzF38UtJGVztl6Wl0ijlK/exec';
+
+const HORA_INICIO_DIA = 7;
+const HORA_FIM_DIA = 23;
 
 async function carregarAgenda() {
   try {
     const res = await fetch(`${API_URL}?action=agenda`);
     const dados = await res.json();
     preencherCardsAgenda(dados);
+
+    const hojeStr = new Date().toISOString().split('T')[0];
+    const inputData = document.getElementById('selectedDate');
+    inputData.value = hojeStr;
+    preencherVisaoDiaria(dados, hojeStr);
+
+    inputData.addEventListener('change', () => {
+      preencherVisaoDiaria(dados, inputData.value);
+    });
+
   } catch (err) {
     console.error('Erro ao carregar agenda:', err);
     alert('Erro ao carregar agenda!');
   } finally {
     document.getElementById('loadingOverlay').style.display = 'none';
-    document.getElementById('containerAgenda').style.display = 'block';
+    document.getElementById('containerAgenda').style.display = 'flex';
   }
 }
 
 function preencherCardsAgenda(agenda) {
-  const container = document.getElementById('cardsContainer');
-  container.innerHTML = '';
+  const cardsContainer = document.getElementById('cardsContainer');
+  cardsContainer.innerHTML = '';
 
-  agenda.sort((a, b) => {
-    const parseData = (dataStr) => {
-      if (!dataStr) return new Date(0);
-      const [dia, mes, resto] = dataStr.split('/');
-      if (!dia || !mes || !resto) return new Date(0);
-      const [ano, hora = '00:00'] = resto.split(' ');
-      const [hh, mm] = hora.split(':');
-      return new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
-    };
-    return parseData(a.Sessão) - parseData(b.Sessão);
-  });
-
+  agenda.sort((a, b) => parseDataHora(a.Sessão) - parseDataHora(b.Sessão));
   const agora = new Date();
   window._agendaData = agenda;
 
   agenda.forEach((item, index) => {
     const prontuarioId = `prontuario-${index}`;
+    const dataSessao = parseDataHora(item.Sessão);
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.id = item.ID;
 
-    const [dia, mes, resto] = item.Sessão.split('/');
-    const [ano, hora = '00:00'] = resto.split(' ');
-    const [hh, mm] = hora.split(':');
-    const dataSessao = new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
-
     let status = '';
-
     if (!isNaN(dataSessao.getTime()) && dataSessao < agora) {
       card.classList.add('passado');
-
       if (!item.Prontuário || item.Prontuário.trim() === '') {
         card.classList.add('cancelado');
         status = 'Cancelado';
@@ -64,14 +60,64 @@ function preencherCardsAgenda(agenda) {
       <p><strong>Sessão:</strong> ${item.Sessão}</p>
       <p><strong>Pagamento:</strong> ${item.Pagamento}</p>
       <p><strong>Status:</strong> ${status}</p>
-      <button onclick="mostrarProntuario('${prontuarioId}')">Ver Prontuário</button>
-      <button onclick="editarAgenda(${index})">Editar compromisso</button>
-      <button class="btn-excluir" onclick="excluirAgenda(${index})">Excluir</button>
+      <div class="card-buttons">
+        <button onclick="mostrarProntuario('${prontuarioId}')">Ver Prontuário</button>
+        <button onclick="editarAgenda(${index})">Editar</button>
+        <button class="btn-excluir" onclick="excluirAgenda(${index})">Excluir</button>
+      </div>
       <div id="${prontuarioId}" style="display:none; margin-top:10px;"><strong>Prontuário:</strong><br>${item.Prontuário}</div>
     `;
-
-    container.appendChild(card);
+    cardsContainer.appendChild(card);
   });
+}
+
+function preencherVisaoDiaria(agenda, dataStr) {
+  const dailyView = document.getElementById('dailyView');
+  dailyView.innerHTML = '';
+
+  for (let hora = HORA_INICIO_DIA; hora <= HORA_FIM_DIA; hora++) {
+    const slot = document.createElement('div');
+    slot.className = 'hour-slot';
+    slot.dataset.hour = hora;
+    slot.innerHTML = `<div class="hour-label">${hora}:00</div>`;
+    dailyView.appendChild(slot);
+  }
+
+  const diaSelecionado = new Date(dataStr);
+  diaSelecionado.setHours(0, 0, 0, 0);
+
+  const doDia = agenda.filter(item => {
+    const data = parseDataHora(item.Sessão);
+    return data.getFullYear() === diaSelecionado.getFullYear() &&
+           data.getMonth() === diaSelecionado.getMonth() &&
+           data.getDate() === diaSelecionado.getDate();
+  });
+
+  doDia.forEach(item => {
+    const data = parseDataHora(item.Sessão);
+    if (isNaN(data.getTime())) return;
+
+    const horaInicio = data.getHours();
+    const minutosInicio = data.getMinutes();
+    const duracaoMin = 60;
+
+    const bloco = document.createElement('div');
+    bloco.className = 'appointment-block';
+    bloco.style.top = `${((horaInicio - HORA_INICIO_DIA) * 60 + minutosInicio)}px`;
+    bloco.style.height = `${duracaoMin}px`;
+    bloco.innerHTML = `<strong>${item.Paciente}</strong><br>${item.Sessão}`;
+
+    dailyView.appendChild(bloco);
+  });
+}
+
+function parseDataHora(dataStr) {
+  if (!dataStr) return new Date(NaN);
+  const [dia, mes, resto] = dataStr.split('/');
+  if (!dia || !mes || !resto) return new Date(NaN);
+  const [ano, hora = '00:00'] = resto.split(' ');
+  const [hh, mm] = hora.split(':');
+  return new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
 }
 
 function editarAgenda(index) {
@@ -104,25 +150,17 @@ document.getElementById("formAgenda").addEventListener("submit", function (e) {
   const pagamento = document.getElementById('agendaPagamento').value;
   const prontuario = document.getElementById('agendaProntuario').value;
 
-  const [dia, mes, resto] = sessao.split('/');
-  const [ano, hora = '00:00'] = resto.split(' ');
-  const [hh, mm] = hora.split(':');
-  const novaData = new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
-
+  const novaData = parseDataHora(sessao);
   if (isNaN(novaData.getTime())) {
     alert("Data inválida.");
     return;
   }
 
-  const existeConflito = window._agendaData.some((item) => {
+  const existeConflito = window._agendaData.some(item => {
     if (item.ID == id) return false;
-    const [d, m, r] = item.Sessão.split('/');
-    const [y, h = '00:00'] = r.split(' ');
-    const [h1, m1] = h.split(':');
-    const dataExistente = new Date(Number(y), Number(m) - 1, Number(d), Number(h1), Number(m1));
+    const dataExistente = parseDataHora(item.Sessão);
     if (isNaN(dataExistente.getTime())) return false;
-    const diffMs = Math.abs(novaData - dataExistente);
-    return diffMs < 60 * 60 * 1000;
+    return Math.abs(novaData - dataExistente) < 60 * 60 * 1000;
   });
 
   if (existeConflito) {
@@ -130,7 +168,7 @@ document.getElementById("formAgenda").addEventListener("submit", function (e) {
     return;
   }
 
-  let url;
+  let url = '';
   if (id === '') {
     url = `${API_URL}?action=createAgenda&paciente=${encodeURIComponent(paciente)}&sessao=${encodeURIComponent(sessao)}`;
   } else {
