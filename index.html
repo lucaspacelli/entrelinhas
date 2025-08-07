@@ -14,16 +14,24 @@
   </div>
 
   <div class="header-card">
-    <h1><img src="ico.png" style="width: 50px; vertical-align: middle;"> Agenda</h1>
+    <h1><img src="ico.png" style="width: 40px; vertical-align: middle;"> Agenda</h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-      
+      <a href="cadastros.html"><button>Cadastros</button></a>
+      <a href="evolucao.html"><button>Evolução</button></a>
+      <button id="btnNovo" onclick="novoAgendamento()"> + Novo Agendamento</button>
     </div>
   </div>
-  <a href="cadastros.html"><button>Cadastros</button></a>
-  <a href="evolucao.html"><button>Evolução</button></a>
-      <button id="btnNovo" onclick="novoAgendamento()"> + Novo Agendamento</button>
-  <div id="containerAgenda" style="display: none;">
+
+  <div id="containerAgenda" style="display: flex;">
     <div id="cardsContainer" class="cards-grid"></div>
+  
+    <div class="daily-view-container">
+      <div class="daily-view-header">
+        <label for="selectedDate"></label>
+        <input type="date" id="selectedDate">
+      </div>
+      <div id="dailyView"></div>
+    </div>
   </div>
 
   <!-- Modal de Edição da Agenda -->
@@ -32,7 +40,7 @@
       <span class="close" onclick="fecharModalAgenda()">&times;</span>
       <h2>Editar Compromisso</h2>
       <form id="formAgenda">
-        <input type="hidden" id="agendaId"> <!-- atualizado -->
+        <input type="hidden" id="agendaId">
         <label>Paciente:
           <input type="text" id="agendaPaciente" required>
         </label>
@@ -45,7 +53,7 @@
         <label>Prontuário:
           <textarea id="agendaProntuario" rows="10" style="resize: vertical;"></textarea>
         </label>
-        <button type="submit">Salvar</button> <!-- corrigido -->
+        <button type="submit">Salvar</button>
       </form>
     </div>
   </div>
