@@ -1,7 +1,12 @@
+html, body {
+  height: 100vh;
+  overflow: hidden;
+}
+
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
-  padding-top: 70px;
+  padding-top: 100px;
   overflow-x: hidden;
 }
 
@@ -13,16 +18,9 @@ body::before {
   z-index: -1;
 }
 
-h1 {
+h1, h2 {
   margin-bottom: 10px;
-  padding: 5px;
-  color: darkslategrey;
-  border-radius: 8px;
-  width: fit-content;
-}
-
-h2 {
-  margin-bottom: 10px;
+  font-size: 20px;
   padding: 5px;
   color: darkslategrey;
   border-radius: 8px;
@@ -49,17 +47,6 @@ button:hover {
   background-color: darkslategrey;
 }
 
-td button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-}
-
-td button:hover {
-  background-color: #495057;
-}
-
 table {
   border-collapse: collapse;
   width: 100%;
@@ -69,30 +56,19 @@ table {
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
+th, td {
+  padding: 10px;
+  font-size: 14px;
+}
+
 th {
   background-color: #f5f5f5;
-  padding: 10px;
   text-align: left;
-  font-size: 14px;
   color: #333;
 }
 
 td {
-  padding: 10px;
   border-top: 1px solid #eee;
-  font-size: 14px;
-}
-
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 10px;
-}
-
-#loading {
-  font-weight: bold;
-  color: #007bff;
-  margin-top: 10px;
 }
 
 /* Modal */
@@ -114,7 +90,6 @@ td {
   border-radius: 6px;
   width: 90%;
   max-width: 1000px;
-  height: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -142,15 +117,6 @@ td {
   font-size: 24px;
   cursor: pointer;
   color: salmon;
-}
-
-#formCadastro button {
-  background-color: #007bff;
-  color: white;
-  padding: 8px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
 /* Loading Overlay */
@@ -184,72 +150,70 @@ td {
   100% { transform: rotate(360deg); }
 }
 
-/* Grade de cards */
+/* Layout principal */
+#containerAgenda {
+  display: flex;
+  gap: 20px;
+}
+
 .cards-grid {
+  flex: 0 0 300px;
   display: flex;
   flex-direction: column-reverse;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
 }
 
 .card {
   background-color: #fff;
-  margin-top: 10px;
-  padding: 15px;
+  font-size: 12px;
+  padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid teal;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid teal;
   display: flex;
   flex-direction: column;
-  width: 98%;
-}
-
-.header-card h1 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #3A6D71;
-  margin: 0;
+  gap: 4px;
+  width: 96%;
 }
 
 .card h3 {
-  margin: 0 0 5px;
-  font-size: 14px;
-  color: #333;
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
 }
 
 .card p {
   margin: 2px 0;
-  color: #333;
+  line-height: 1.2;
 }
 
-.card button {
-  align-self: flex-start;
-  margin-top: 8px;
-  background-color: teal;
+.card-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
 }
 
-.card button:hover {
-  align-self: flex-start;
-  margin-top: 8px;
-  background-color: lightseagreen;
+.card button,
+.card .btn-excluir {
+  padding: 4px 6px;
+  font-size: 11px;
+  border-radius: 4px;
 }
 
-button.btn-excluir {
-  align-self: flex-start;
-  margin-top: 8px;
-  margin-left: 2px;
-  background-color: lightcoral;
-  color: white;
-  padding: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: small;
+.card.passado {
+  filter: grayscale(0.7);
+  border-left: 5px solid #999;
 }
 
-button.btn-excluir:hover {
-  background-color: #e04b4b;
+.card.cancelado {
+  filter: grayscale(0.1);
+  border-left: 5px solid #d98c8c;
 }
 
+/* Cabeçalho fixo */
 .header-card {
   position: fixed;
   top: 0;
@@ -262,8 +226,7 @@ button.btn-excluir:hover {
   background-position: right;
   background-repeat: no-repeat;
   width: 100%;
-  border-radius: 0px;
-  border-left: 0px;
+  border-radius: 0;
   box-shadow: 0 5px 10px rgba(0,0,0,0.1);
   display: flex;
   flex-wrap: wrap;
@@ -278,45 +241,98 @@ button.btn-excluir:hover {
   background-color: teal;
 }
 
-.card.passado {
-  filter: grayscale(0.7);  
-  border-left: 5px solid #999;
+/* Visão diária */
+.daily-view-container {
+  flex: 2;
+  position: relative;
+  background-color: white;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
 }
 
-.card.cancelado {
-  filter: grayscale(0.1);
-  border-left: 5px solid #d98c8c;
+.daily-view-header {
+  padding: 8px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  position: sticky;
+  background-color: white;
+  top: -10px;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Responsividade */
-@media (max-width: 600px) {
-  h1 {
-    font-size: 20px;
-    text-align: center;
-  }
-
-  .header-card {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .card {
-    width: 90%;
-  }
-
-  .modal-content {
-    width: 95%;
-    height: auto;
-  }
+.daily-view-header label {
+  font-weight: bold;
+  margin-right: 6px;
 }
 
-@media print {
-  .header-card {
-    position: static !important;
-    page-break-after: always;
-  }
+#selectedDate {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  max-width: 160px;
+  text-align: center;
+}
 
-  .header-card ~ * {
-    page-break-inside: avoid;
-  }
+#dailyView {
+  position: relative;
+  height: 1020px; /* 17h * 60min = 1020px */
+  border-left: 1px solid #ccc;
+}
+
+.hour-slot {
+  position: relative;
+  height: 60px;
+  border-top: 1px dashed #ddd;
+}
+
+.hour-label {
+  position: absolute;
+  left: 0;
+  width: 40px;
+  font-size: 12px;
+  color: #777;
+  text-align: right;
+}
+
+.appointment-block {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  background: #b9e4ff;
+  border-left: 5px solid #007bff;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Scrollbar discreta com cantos arredondados - WebKit */
+.cards-grid::-webkit-scrollbar,
+.daily-view-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.cards-grid::-webkit-scrollbar-track,
+.daily-view-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cards-grid::-webkit-scrollbar-thumb,
+.daily-view-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+/* Scrollbar para Firefox */
+.cards-grid,
+.daily-view-container {
+  overflow-y: auto;
+  scrollbar-width: none;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
 }
