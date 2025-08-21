@@ -8,7 +8,7 @@ async function carregarAgenda() {
     const res = await fetch(`${API_URL}?action=agenda`);
     const dados = await res.json();
 
-    // guarda em memória e mostra cards
+    // guarda em memória e mostra cards (ordenados por data)
     window._agendaData = dados.slice().sort((a, b) => parseDataHora(a.Sessão) - parseDataHora(b.Sessão));
     preencherCardsAgenda(window._agendaData);
 
@@ -39,7 +39,8 @@ function preencherCardsAgenda(agenda) {
 
   const agora = new Date();
 
-  agenda.forEach((item, index) => {
+  // inverte a ordem para exibir últimos compromissos em cima
+  agenda.slice().reverse().forEach((item, index) => {
     const prontuarioId = `prontuario-${index}`;
     const dataSessao = parseDataHora(item.Sessão);
     const card = document.createElement('div');
@@ -73,6 +74,9 @@ function preencherCardsAgenda(agenda) {
     `;
     cardsContainer.appendChild(card);
   });
+
+  // garante que carregue no topo
+  cardsContainer.scrollTop = 0;
 }
 
 function preencherVisaoDiaria(agenda, diaSelecionado) {
