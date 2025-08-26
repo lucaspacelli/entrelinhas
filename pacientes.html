@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <title>Pacientes</title>
+    <link href="ico.png" rel="icon" type="image/x-icon"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="pacientes.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+<body>
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Carregando dados...</p>
+  </div>
+
+  <div class="header-card">
+    <h1><img src="ico.png" style="width: 50px; vertical-align: middle;"> Pacientes</h1>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="index.html"><button>Agenda</button></a>
+        <button id="btnNovo" onclick="novoCadastro()" class="botao-verde">+ Novo Paciente</button>
+    </div>
+  </div>
+
+  <div id="containerPrincipal" style="display: flex; gap: 20px;">
+    <div id="cardsContainerCadastros" class="cards-grid">
+      </div>
+
+    <div id="containerEvolucao" class="daily-view-container">
+      <div class="card" style="padding: 20px; text-align: center;">
+        <p><strong>Selecione um paciente na lista à esquerda para ver sua evolução.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModal()">&times;</span>
+      <h2 id="modalTitulo"><strong>Novo Paciente</strong></h2>
+      <form id="formCadastro">
+        <input type="hidden" id="inputId">
+        <label>Paciente: <input type="text" id="inputPaciente" required></label>
+        <label>Valor: <input type="text" id="inputValor" required></label>
+        <label>Data de Reajuste: <input type="date" id="inputData" required></label>
+        <label>Situação:
+          <select id="inputSituacao" required>
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
+        </label>
+        <label>Telefone: <input type="text" id="inputTelefone"></label>
+        <button type="submit" class="botao-verde">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="pacientes.js"></script>
+</body>
+</html>
