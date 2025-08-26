@@ -3,6 +3,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxjVk4pa9zfDoU9HQGA2Cl8
 const HORA_INICIO_DIA = 7;
 const HORA_FIM_DIA = 23;
 let listaPacientes = [];
+let _agendaData = [];
 
 async function salvarStatus(selectElement, appointmentId) {
   const novoStatus = selectElement.value;
@@ -16,7 +17,6 @@ async function salvarStatus(selectElement, appointmentId) {
       if (itemIndex > -1) {
         window._agendaData[itemIndex].Status = novoStatus;
       }
-      // MODIFICADO: Recarrega os cards para atualizar o estado dos botões
       preencherCardsAgenda(window._agendaData);
     } else {
       throw new Error(result.message || "Erro desconhecido ao salvar status.");
@@ -31,7 +31,7 @@ async function salvarStatus(selectElement, appointmentId) {
 
 function gerarOpcoesStatus(statusAtual) {
   const statusOptions = ['Agendado', 'Confirmado', 'Concluído', 'Cancelado'];
-  return statusOptions.map(opt => 
+  return statusOptions.map(opt =>
     `<option value="${opt}" ${opt === statusAtual ? 'selected' : ''}>${opt}</option>`
   ).join('');
 }
@@ -87,243 +87,219 @@ function popularPacientesDropdown(pacienteSelecionado = '') {
 }
 
 function preencherCardsAgenda(agenda) {
-  const cardsContainer = document.getElementById('cardsContainer');
-  cardsContainer.innerHTML = '';
-  agenda.slice().reverse().forEach((item) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    const statusAtual = item.Status || 'Agendado';
-    const linkMeet = item['Link Meet'];
-
-    // --- MODIFICADO: Adiciona a classe de status ao card ---
-    if (statusAtual === 'Concluído') {
-      card.classList.add('status-concluido');
-    } else if (statusAtual === 'Cancelado') {
-      card.classList.add('status-cancelado');
-    }
-    // --- Fim da modificação ---
-
-    const desabilitarConfirmacao = statusAtual === 'Confirmado' || statusAtual === 'Concluído' || statusAtual === 'Cancelado';
-    const desabilitarAcoesOnline = statusAtual === 'Concluído' || statusAtual === 'Cancelado';
-
-    let botaoConfirmacao = '', botaoEnviarLink = '', botaoMeet = '';
-    const infoPaciente = listaPacientes.find(p => p.Paciente.trim().toLowerCase() === item.Paciente.trim().toLowerCase());
-    const telefoneFormatado = infoPaciente ? formatarTelefoneParaWhatsApp(infoPaciente.Telefone) : null;
-    
-    const dataSessao = parseDataHora(item.Sessão);
-
-    if (telefoneFormatado) {
-      const horaSessao = dataSessao.toTimeString().slice(0, 5);
-      const dataFormatada = `${String(dataSessao.getDate()).padStart(2,'0')}/${String(dataSessao.getMonth()+1).padStart(2,'0')}/${dataSessao.getFullYear()}`;
-      const textoData = sameDay(dataSessao, new Date()) ? `hoje às ${horaSessao}h` : `para o dia ${dataFormatada} às ${horaSessao}h`;
-      const msgConfirmacao = `Olá, tudo bem? Estou entrando em contato para confirmar nossa sessão agendada para ${textoData}.\n\nPara garantir a realização da sessão, solicito que o pagamento seja realizado por meio do Pix, utilizando a seguinte chave: psi.andressaferreira@gmail.com\n\nAguardo o seu retorno para encaminhar o link de acesso! Até mais`;
-      const urlConfirmacao = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msgConfirmacao)}`;
-      botaoConfirmacao = `<a href="${urlConfirmacao}" target="_blank" rel="noopener noreferrer"><button class="btn-confirm ${desabilitarConfirmacao ? 'btn-disabled' : ''}" ${desabilitarConfirmacao ? 'disabled' : ''}><i class="fas fa-check"></i> Confirmação</button></a>`;
-    }
-    if (telefoneFormatado && linkMeet) {
-      const msgLink = `Muito obrigada! Segue o link para a nossa sessão. Estarei lhe aguardando, até mais!\n\n${linkMeet}`;
-      const urlLink = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msgLink)}`;
-      botaoEnviarLink = `<a href="${urlLink}" target="_blank" rel="noopener noreferrer"><button class="btn-whatsapp ${desabilitarAcoesOnline ? 'btn-disabled' : ''}" ${desabilitarAcoesOnline ? 'disabled' : ''}><i class="fab fa-whatsapp"></i> Enviar Link</button></a>`;
-    }
-    if (linkMeet) {
-      botaoMeet = `<a href="${linkMeet}" target="_blank" rel="noopener noreferrer"><button class="btn-meet ${desabilitarAcoesOnline ? 'btn-disabled' : ''}" ${desabilitarAcoesOnline ? 'disabled' : ''}><i class="fas fa-video"></i> Entrar na Sala</button></a>`;
-    }
-    const botaoEditar = `<button onclick="editarAgenda(${item.ID})"><i class="fas fa-edit"></i> Editar</button>`;
-    const botaoExcluir = `<button class="btn-excluir" onclick="excluirAgenda(${item.ID})"><i class="fas fa-trash"></i> Excluir</button>`;
-    
-    let sessaoFormatadaParaDisplay = item.Sessão;
-    if (!isNaN(dataSessao.getTime())) {
-      const dia = String(dataSessao.getDate()).padStart(2, '0');
-      const mes = String(dataSessao.getMonth() + 1).padStart(2, '0');
-      const ano = dataSessao.getFullYear();
-      const hora = dataSessao.toTimeString().slice(0, 5);
-      sessaoFormatadaParaDisplay = `${dia}/${mes}/${ano} ${hora}`;
-    }
-
-    card.innerHTML = `
-      <h3>${item.Paciente}</h3>
-      <p><strong>Sessão:</strong> ${sessaoFormatadaParaDisplay}</p>
-      <select class="status-select" onchange="salvarStatus(this, ${item.ID})">
-        ${gerarOpcoesStatus(statusAtual)}
-      </select>
-      <div class="card-buttons">
-        ${botaoConfirmacao} ${botaoEnviarLink} ${botaoMeet} ${botaoEditar} ${botaoExcluir}
-      </div>
-    `;
-    cardsContainer.appendChild(card);
-  });
-  cardsContainer.scrollTop = 0;
+    const cardsContainer = document.getElementById('cardsContainer');
+    cardsContainer.innerHTML = '';
+    agenda.slice().reverse().forEach((item) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const statusAtual = item.Status || 'Agendado';
+      if (statusAtual === 'Concluído') {
+        card.classList.add('status-concluido');
+      } else if (statusAtual === 'Cancelado') {
+        card.classList.add('status-cancelado');
+      }
+      const desabilitarConfirmacao = statusAtual === 'Confirmado' || statusAtual === 'Concluído' || statusAtual === 'Cancelado';
+      const desabilitarAcoesOnline = statusAtual === 'Concluído' || statusAtual === 'Cancelado';
+      let botaoConfirmacao = '', botaoEnviarLink = '', botaoMeet = '';
+      const infoPaciente = listaPacientes.find(p => p.Paciente.trim().toLowerCase() === item.Paciente.trim().toLowerCase());
+      const telefoneFormatado = infoPaciente ? formatarTelefoneParaWhatsApp(infoPaciente.Telefone) : null;
+      const linkMeet = item['Link Meet'];
+      const dataSessao = parseDataHora(item.Sessão);
+  
+      if (telefoneFormatado) {
+        const horaSessao = dataSessao.toTimeString().slice(0, 5);
+        const dataFormatada = `${String(dataSessao.getDate()).padStart(2,'0')}/${String(dataSessao.getMonth()+1).padStart(2,'0')}/${dataSessao.getFullYear()}`;
+        const textoData = sameDay(dataSessao, new Date()) ? `hoje às ${horaSessao}h` : `para o dia ${dataFormatada} às ${horaSessao}h`;
+        const msgConfirmacao = `Olá, tudo bem? Estou entrando em contato para confirmar nossa sessão agendada para ${textoData}.\n\nPara garantir a realização da sessão, solicito que o pagamento seja realizado por meio do Pix, utilizando a seguinte chave: psi.andressaferreira@gmail.com\n\nAguardo o seu retorno para encaminhar o link de acesso! Até mais`;
+        const urlConfirmacao = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msgConfirmacao)}`;
+        botaoConfirmacao = `<a href="${urlConfirmacao}" target="_blank" rel="noopener noreferrer"><button class="btn-confirm ${desabilitarConfirmacao ? 'btn-disabled' : ''}" ${desabilitarConfirmacao ? 'disabled' : ''}><i class="fas fa-check"></i> Confirmação</button></a>`;
+      }
+      if (telefoneFormatado && linkMeet) {
+        const msgLink = `Muito obrigada! Segue o link para a nossa sessão. Estarei lhe aguardando, até mais!\n\n${linkMeet}`;
+        const urlLink = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msgLink)}`;
+        botaoEnviarLink = `<a href="${urlLink}" target="_blank" rel="noopener noreferrer"><button class="btn-whatsapp ${desabilitarAcoesOnline ? 'btn-disabled' : ''}" ${desabilitarAcoesOnline ? 'disabled' : ''}><i class="fab fa-whatsapp"></i> Enviar Link</button></a>`;
+      }
+      if (linkMeet) {
+        botaoMeet = `<a href="${linkMeet}" target="_blank" rel="noopener noreferrer"><button class="btn-meet ${desabilitarAcoesOnline ? 'btn-disabled' : ''}" ${desabilitarAcoesOnline ? 'disabled' : ''}><i class="fas fa-video"></i> Entrar na Sala</button></a>`;
+      }
+      const botaoEditar = `<button onclick="editarAgenda(${item.ID})"><i class="fas fa-edit"></i> Editar</button>`;
+      const botaoExcluir = `<button class="btn-excluir" onclick="excluirAgenda(${item.ID})"><i class="fas fa-trash"></i> Excluir</button>`;
+      
+      let sessaoFormatadaParaDisplay = item.Sessão;
+      if (!isNaN(dataSessao.getTime())) {
+        const dia = String(dataSessao.getDate()).padStart(2, '0');
+        const mes = String(dataSessao.getMonth() + 1).padStart(2, '0');
+        const ano = dataSessao.getFullYear();
+        const hora = dataSessao.toTimeString().slice(0, 5);
+        sessaoFormatadaParaDisplay = `${dia}/${mes}/${ano} ${hora}`;
+      }
+  
+      card.innerHTML = `
+        <h3>${item.Paciente}</h3>
+        <p><strong>Sessão:</strong> ${sessaoFormatadaParaDisplay}</p>
+        <select class="status-select" onchange="salvarStatus(this, ${item.ID})">
+          ${gerarOpcoesStatus(statusAtual)}
+        </select>
+        <div class="card-buttons">
+          ${botaoConfirmacao} ${botaoEnviarLink} ${botaoMeet} ${botaoEditar} ${botaoExcluir}
+        </div>
+      `;
+      cardsContainer.appendChild(card);
+    });
+    cardsContainer.scrollTop = 0;
 }
 
 function editarAgenda(id) {
-  const item = window._agendaData.find(appt => appt.ID == id);
-  if (!item) return alert('Erro: Compromisso não encontrado.');
-
-  popularPacientesDropdown(item.Paciente);
-
-  // Popula a data e hora da sessão
-  const dataSessao = parseDataHora(item.Sessão);
-  if (!isNaN(dataSessao.getTime())) {
-    document.getElementById('agendaData').value = toIsoDateLocal(dataSessao);
-    document.getElementById('agendaHora').value = dataSessao.toTimeString().slice(0, 5);
-  }
-
-  // MODIFICADO: Converte a data de pagamento para o formato do input (YYYY-MM-DD)
-  const dataPagamento = parseDataHora(item.Pagamento);
-  if (!isNaN(dataPagamento.getTime())) {
-    document.getElementById('agendaPagamento').value = toIsoDateLocal(dataPagamento);
-  } else {
-    document.getElementById('agendaPagamento').value = ''; // Limpa o campo se não houver data
-  }
-
-  document.getElementById('agendaId').value = item.ID;
-  document.getElementById('agendaProntuario').value = item.Prontuário;
-  document.getElementById('modalAgenda').style.display = 'flex';
+    const item = window._agendaData.find(appt => appt.ID == id);
+    if (!item) return alert('Erro: Compromisso não encontrado.');
+    popularPacientesDropdown(item.Paciente);
+    const dataSessao = parseDataHora(item.Sessão);
+    if (!isNaN(dataSessao.getTime())) {
+      document.getElementById('agendaData').value = toIsoDateLocal(dataSessao);
+      document.getElementById('agendaHora').value = dataSessao.toTimeString().slice(0, 5);
+    }
+    const dataPagamento = parseDataHora(item.Pagamento);
+    if (!isNaN(dataPagamento.getTime())) {
+      document.getElementById('agendaPagamento').value = toIsoDateLocal(dataPagamento);
+    } else {
+      document.getElementById('agendaPagamento').value = '';
+    }
+    document.getElementById('agendaId').value = item.ID;
+    document.getElementById('agendaProntuario').value = item.Prontuário;
+    document.getElementById('modalAgenda').style.display = 'flex';
 }
 
 function novoAgendamento() {
-  document.getElementById("formAgenda").reset();
-  popularPacientesDropdown();
-  document.getElementById('agendaData').value = toIsoDateLocal(new Date());
-  document.getElementById('agendaHora').value = "10:00";
-  document.getElementById('agendaId').value = '';
-  document.getElementById('modalAgenda').style.display = 'flex';
+    document.getElementById("formAgenda").reset();
+    popularPacientesDropdown();
+    document.getElementById('agendaData').value = toIsoDateLocal(new Date());
+    document.getElementById('agendaHora').value = "10:00";
+    document.getElementById('agendaId').value = '';
+    document.getElementById('modalAgenda').style.display = 'flex';
 }
 
 document.getElementById("formAgenda").addEventListener("submit", function (e) {
-  e.preventDefault();
-  
-  const id = document.getElementById('agendaId').value;
-  const paciente = document.getElementById('agendaPaciente').value;
-  const data = document.getElementById('agendaData').value;
-  const hora = document.getElementById('agendaHora').value;
-  const prontuario = document.getElementById('agendaProntuario').value;
-
-  // MODIFICADO: Lê a data do pagamento e formata para dd/MM/yyyy
-  const pagamentoISO = document.getElementById('agendaPagamento').value; // Pega o formato YYYY-MM-DD
-  let pagamentoFormatado = '';
-  if (pagamentoISO) {
-    const [anoP, mesP, diaP] = pagamentoISO.split('-');
-    pagamentoFormatado = `${diaP}/${mesP}/${anoP}`;
-  }
-
-  const [ano, mes, dia] = data.split('-');
-  const sessaoFormatada = `${dia}/${mes}/${ano} ${hora}`;
-  
-  const novaData = new Date(`${data}T${hora}`);
-  if (isNaN(novaData.getTime())) {
-    alert("Data ou hora inválida.");
-    return;
-  }
-  const existeConflito = window._agendaData.some(item => {
-    if (item.ID == id) return false;
-    const dataExistente = parseDataHora(item.Sessão);
-    return Math.abs(novaData - dataExistente) < 50 * 60 * 1000;
-  });
-  if (existeConflito) {
-    if (!confirm("Já existe uma sessão marcada neste horário ou muito próxima. Deseja continuar mesmo assim?")) {
+    e.preventDefault();
+    const id = document.getElementById('agendaId').value;
+    const paciente = document.getElementById('agendaPaciente').value;
+    const data = document.getElementById('agendaData').value;
+    const hora = document.getElementById('agendaHora').value;
+    const prontuario = document.getElementById('agendaProntuario').value;
+    const pagamentoISO = document.getElementById('agendaPagamento').value;
+    let pagamentoFormatado = '';
+    if (pagamentoISO) {
+      const [anoP, mesP, diaP] = pagamentoISO.split('-');
+      pagamentoFormatado = `${diaP}/${mesP}/${anoP}`;
+    }
+    const [ano, mes, dia] = data.split('-');
+    const sessaoFormatada = `${dia}/${mes}/${ano} ${hora}`;
+    const novaData = new Date(`${data}T${hora}`);
+    if (isNaN(novaData.getTime())) {
+      alert("Data ou hora inválida.");
       return;
     }
-  }
-  
-  const urlParams = new URLSearchParams({
-      action: id ? 'updateAgenda' : 'createAgenda',
-      id: id,
-      paciente: paciente,
-      sessao: sessaoFormatada,
-      pagamento: pagamentoFormatado, // Usa a variável com a data formatada
-      prontuario: prontuario
-  });
-  
-  fetch(`${API_URL}?${urlParams.toString()}`).then(() => {
-    fecharModalAgenda();
-    carregarDadosIniciais();
-  });
+    const existeConflito = window._agendaData.some(item => {
+      if (item.ID == id) return false;
+      const dataExistente = parseDataHora(item.Sessão);
+      return Math.abs(novaData - dataExistente) < 50 * 60 * 1000;
+    });
+    if (existeConflito) {
+      if (!confirm("Já existe uma sessão marcada neste horário ou muito próxima. Deseja continuar mesmo assim?")) {
+        return;
+      }
+    }
+    const urlParams = new URLSearchParams({
+        action: id ? 'updateAgenda' : 'createAgenda',
+        id: id,
+        paciente: paciente,
+        sessao: sessaoFormatada,
+        pagamento: pagamentoFormatado,
+        prontuario: prontuario
+    });
+    fetch(`${API_URL}?${urlParams.toString()}`).then(() => {
+      fecharModalAgenda();
+      carregarDadosIniciais();
+    });
 });
 
-// MODIFICADO: Correção para o bug da agenda não aparecer
 function preencherVisaoDiaria(agenda, diaSelecionado) {
-  const dailyView = document.getElementById('dailyView');
-  dailyView.innerHTML = '';
-  for (let hora = HORA_INICIO_DIA; hora <= HORA_FIM_DIA; hora++) {
-    const slot = document.createElement('div');
-    slot.className = 'hour-slot';
-    slot.dataset.hour = hora;
-    slot.innerHTML = `<div class="hour-label">${String(hora).padStart(2,'0')}:00</div>`;
-    dailyView.appendChild(slot);
-  }
-
-  const doDia = agenda.filter(item => sameDay(parseDataHora(item.Sessão), diaSelecionado));
-
-  doDia.forEach(item => {
-    const data = parseDataHora(item.Sessão);
-    if (isNaN(data.getTime())) return;
-    
-    const horaFormatada = data.toTimeString().slice(0, 5);
-    const diaFormatado = `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
-
-    const offsetMin = (data.getHours() - HORA_INICIO_DIA) * 60 + data.getMinutes();
-    if (offsetMin < 0 || offsetMin > ((HORA_FIM_DIA - HORA_INICIO_DIA + 1) * 60)) return;
-    
-    const bloco = document.createElement('div');
-    bloco.className = 'appointment-block';
-    // Usando os seus valores de ajuste que funcionaram
-    bloco.style.top = `${offsetMin + 15}px`;
-    bloco.style.height = `${60 - 7}px`;
-    bloco.innerHTML = `<strong>${item.Paciente}</strong><br>${diaFormatado} ${horaFormatada}`;
-    dailyView.appendChild(bloco);
-  });
+    const dailyView = document.getElementById('dailyView');
+    dailyView.innerHTML = '';
+    for (let hora = HORA_INICIO_DIA; hora <= HORA_FIM_DIA; hora++) {
+      const slot = document.createElement('div');
+      slot.className = 'hour-slot';
+      slot.innerHTML = `<div class="hour-label">${String(hora).padStart(2, '0')}:00</div>`;
+      dailyView.appendChild(slot);
+    }
+    const doDia = agenda.filter(item => {
+      const dataItem = parseDataHora(item.Sessão);
+      return sameDay(dataItem, diaSelecionado);
+    });
+    doDia.forEach(item => {
+      const data = parseDataHora(item.Sessão);
+      if (isNaN(data.getTime())) return;
+      const horaFormatada = data.toTimeString().slice(0, 5);
+      const diaFormatado = `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+      const offsetMin = (data.getHours() - HORA_INICIO_DIA) * 60 + data.getMinutes();
+      if (offsetMin < 0 || offsetMin > (HORA_FIM_DIA - HORA_INICIO_DIA + 1) * 60) return;
+      const bloco = document.createElement('div');
+      bloco.className = 'appointment-block';
+      bloco.style.top = `${offsetMin + 1}px`;
+      bloco.style.height = `${60 - 2}px`;
+      bloco.innerHTML = `<strong>${item.Paciente}</strong><br>${diaFormatado} ${horaFormatada}`;
+      dailyView.appendChild(bloco);
+    });
 }
 
 function parseDataHora(dataStr) {
-  if (!dataStr) return new Date(NaN);
-  if (typeof dataStr === 'string' && dataStr.includes('T')) {
-    return new Date(dataStr);
-  }
-  if (typeof dataStr === 'string' && dataStr.includes('/')) {
-    const [dataPart, horaPart = '00:00'] = dataStr.split(' ');
-    const [dia, mes, ano] = dataPart.split('/');
-    const [hh = '00', mm = '00'] = horaPart.split(':');
-    if(dia && mes && ano) {
-      return new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
+    if (!dataStr) return new Date(NaN);
+    if (typeof dataStr === 'string' && dataStr.includes('T')) {
+      return new Date(dataStr);
     }
-  }
-  return new Date(dataStr);
+    if (typeof dataStr === 'string' && dataStr.includes('/')) {
+      const [dataPart, horaPart = '00:00'] = dataStr.split(' ');
+      const [dia, mes, ano] = dataPart.split('/');
+      const [hh = '00', mm = '00'] = horaPart.split(':');
+      if (dia && mes && ano) {
+        return new Date(Number(ano), Number(mes) - 1, Number(dia), Number(hh), Number(mm));
+      }
+    }
+    return new Date(dataStr);
 }
 
 function parseIsoDateLocal(iso) {
-  if (!iso) return new Date(NaN);
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d);
+    if (!iso) return new Date(NaN);
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
 }
 
 function toIsoDateLocal(d) {
-  if (!d || isNaN(d.getTime())) return '';
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+    if (!d || isNaN(d.getTime())) return '';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
 }
 
 function sameDay(a, b) {
-  if (!a || !b || isNaN(a.getTime()) || isNaN(b.getTime())) return false;
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    if (!a || !b || isNaN(a.getTime()) || isNaN(b.getTime())) return false;
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 function fecharModalAgenda() {
-  document.getElementById('modalAgenda').style.display = 'none';
-  document.getElementById('formAgenda').reset();
+    document.getElementById('modalAgenda').style.display = 'none';
+    document.getElementById('formAgenda').reset();
 }
 
 function excluirAgenda(id) {
-  const item = window._agendaData.find(appt => appt.ID == id);
-  const nomePaciente = item ? item.Paciente : 'este compromisso';
-  if (!confirm(`Tem certeza que deseja excluir o compromisso de ${nomePaciente}?`)) return;
-  const url = `${API_URL}?action=deleteAgenda&id=${id}`;
-  fetch(url).then(() => carregarDadosIniciais()).catch(err => {
-    console.error('Erro ao excluir compromisso:', err);
-    alert('Erro ao excluir compromisso.');
-  });
+    const item = window._agendaData.find(appt => appt.ID == id);
+    const nomePaciente = item ? item.Paciente : 'este compromisso';
+    if (!confirm(`Tem certeza que deseja excluir o compromisso de ${nomePaciente}?`)) return;
+    const url = `${API_URL}?action=deleteAgenda&id=${id}`;
+    fetch(url).then(() => carregarDadosIniciais()).catch(err => {
+      console.error('Erro ao excluir compromisso:', err);
+      alert('Erro ao excluir compromisso.');
+    });
 }
 
 window.onload = carregarDadosIniciais;
