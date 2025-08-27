@@ -93,18 +93,22 @@ function mostrarEvolucao(nomePaciente, cardElement) {
   cardElement.classList.add('selecionado');
   const container = document.getElementById('containerEvolucao');
   container.innerHTML = '';
+
   const prontuarios = dadosAgenda
     .filter(item => item.Paciente === nomePaciente && item.Prontuário && item.Prontuário.trim() !== '')
-    .sort((a, b) => new Date(a.Sessão) - new Date(b.Sessão));
+    // MODIFICADO: Inverte a ordem da classificação (b - a) para mostrar o mais recente primeiro
+    .sort((a, b) => new Date(b.Sessão) - new Date(a.Sessão));
+
   const header = document.createElement('div');
   header.className = 'card evolution-card';
   header.innerHTML = `
     <h2>Prontuário de Evolução</h2>
     <p><strong>Psicóloga:</strong> Andressa Alves Ferreira CRP: xxx</p>
     <p><strong>Paciente:</strong> ${nomePaciente}</p>
-    <p><strong>Número de Sessões:</strong> ${prontuarios.length}</p>
+    <p><strong>Número de Sessões com Prontuário:</strong> ${prontuarios.length}</p>
   `;
   container.appendChild(header);
+
   if (prontuarios.length === 0) {
     const vazio = document.createElement('div');
     vazio.className = 'card';
@@ -112,17 +116,21 @@ function mostrarEvolucao(nomePaciente, cardElement) {
     container.appendChild(vazio);
     return;
   }
-  prontuarios.forEach((item, idx) => {
+
+  prontuarios.forEach((item) => { // Removido o 'idx' que não é mais necessário
     const div = document.createElement('div');
     div.className = 'card evolution-card';
+    
     const dataSessao = new Date(item.Sessão);
     const dia = String(dataSessao.getDate()).padStart(2, '0');
     const mes = String(dataSessao.getMonth() + 1).padStart(2, '0');
     const ano = dataSessao.getFullYear();
     const hora = dataSessao.toTimeString().slice(0, 5);
     const dataFormatada = `${dia}/${mes}/${ano} ${hora}`;
+
+    // MODIFICADO: Remove "Sessão X" e deixa apenas a data formatada no título
     div.innerHTML = `
-      <h3>Sessão ${idx + 1} - ${dataFormatada}</h3>
+      <h3>${dataFormatada}</h3>
       <p style="white-space: pre-wrap;">${item.Prontuário}</p>
     `;
     container.appendChild(div);
