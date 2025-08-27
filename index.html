@@ -15,41 +15,35 @@
   </div>
 
   <div class="header-card">
-    <h1><img src="ico.png" style="width: 40px; vertical-align: middle;"> Agenda</h1>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <h1><img src="ico.png" style="width: 40px; vertical-align: middle;">  Agenda</h1>
+    <div class="header-controls">
+      <input type="date" id="selectedDate">
       <a href="pacientes.html"><button>Pacientes</button></a>
-      <button id="btnNovo" onclick="novoAgendamento()"> + Novo Agendamento</button>
+      <button id="btnNovo" onclick="novoAgendamento()">+ Novo Agendamento</button>
     </div>
   </div>
 
-  <div id="containerAgenda" style="display: flex;">
+  <div id="containerAgenda">
     <div id="cardsContainer" class="cards-grid"></div>
-  
-    <div class="daily-view-container">
-      <div class="daily-view-header">
-        <label for="selectedDate"></label>
-        <input type="date" id="selectedDate">
+    <div id="weeklyViewContainer" class="weekly-view-wrapper">
       </div>
-      <div id="dailyView"></div>
-    </div>
   </div>
 
   <div id="modalAgenda" class="modal">
     <div class="modal-content">
       <span class="close" onclick="fecharModalAgenda()">&times;</span>
-      <h2>Editar Compromisso</h2>
+      <h2 id="modalTitulo">Editar Compromisso</h2>
       <form id="formAgenda">
         <input type="hidden" id="agendaId">
         <label>Paciente:
           <select id="agendaPaciente" required></select>
         </label>
-
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <label style="flex: 1; min-width: 150px;">Data da Sessão:
                 <input type="date" id="agendaData" required>
             </label>
             <label style="flex: 1; min-width: 150px;">Hora da Sessão:
-                <input type="time" id="agendaHora" required step="900"> </label>
+                <input type="time" id="agendaHora" required step="900"></label>
         </div>
         <label>Data do Pagamento:
           <input type="date" id="agendaPagamento">
