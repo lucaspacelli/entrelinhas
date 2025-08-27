@@ -59,9 +59,7 @@ button:hover {
   flex-shrink: 0; /* CORRIGIDO: Impede que o botão encolha ou estique */
 }
 
-.botao-verde {
-  background-color: #198754;
-}
+#btnNovo { background-color: #198754; }
 
 .btn-excluir {
   background-color: #dc3545;
