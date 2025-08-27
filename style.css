@@ -1,423 +1,141 @@
-html, body {
-  height: 100vh;
-  overflow: hidden;
-}
+/* Estilos Gerais */
+html, body { height: 100vh; overflow: hidden; }
+body { font-family: Arial, sans-serif; padding: 20px; padding-top: 80px; box-sizing: border-box; background-color: #f4f7f6; }
+h1, h2 { margin: 0; padding: 0; font-size: 22px; color: darkslategrey; }
+h3 { margin: 0; font-size: 14px; font-weight: bold; }
+p { margin: 4px 0; }
+button { padding: 8px 14px; font-size: 14px; color: white; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+button:hover { opacity: 0.9; }
 
-body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  padding-top: 100px;
-  overflow-x: hidden;
-}
+/* Cabeçalho Fixo */
+.header-card { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background-color: white; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 20px; box-sizing: border-box; }
+.header-controls { display: flex; align-items: center; gap: 10px; }
+.header-controls button { background-color: teal; }
+#btnNovo { background-color: #198754; }
+#selectedDate { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0,0,0,0.1);
-  z-index: -1;
-}
-
-h1, h2 {
-  margin-bottom: 10px;
-  font-size: 20px;
-  padding: 5px;
-  color: darkslategrey;
-  border-radius: 8px;
-  width: fit-content;
-}
-
-button {
-  padding: 6px 10px;
-  margin: 2px;
-  font-size: 14px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-#btnNovo {
-  margin-bottom: 10px;
-  background-color: darkslategrey;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-th, td {
-  padding: 10px;
-  font-size: 14px;
-}
-
-th {
-  background-color: #f5f5f5;
-  text-align: left;
-  color: #333;
-}
-
-td {
-  border-top: 1px solid #eee;
-}
-
-/* Modal */
+/* Modal e seus campos */
 .modal {
-  display: none; /* ADICIONADO DE VOLTA: Garante que o modal começa escondido */
-  position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.5);
-  align-items: flex-start;
-  justify-content: center;
+  display: none; position: fixed; z-index: 999;
+  left: 0; top: 0; width: 100%; height: 100%;
+  overflow: auto; background-color: rgba(0, 0, 0, 0.5);
+  align-items: flex-start; justify-content: center;
   padding-top: 100px;
 }
-
 .modal-content {
-  background-color: #fff;
-  /* REMOVIDO: margin: auto; pois o Flexbox já está centralizando */
-  padding: 10px;
-  border-radius: 6px;
-  width: 90%;
-  max-width: 1000px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  background-color: #fff; padding: 10px; border-radius: 6px;
+  width: 90%; max-width: 1000px; display: flex;
+  flex-direction: column; gap: 12px;
 }
-
 .modal-content label {
-  display: flex;
-  flex-direction: column;
-  padding: 5px;
+  display: flex; flex-direction: column; padding: 5px;
 }
 
-.modal-content input,
-.modal-content textarea {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.modal-content textarea {
-  max-height: 300px;
-  resize: vertical;
-}
-
-.close {
-  align-self: flex-end;
-  font-size: 24px;
-  cursor: pointer;
-  color: salmon;
-}
-
-/* Loading Overlay */
-#loadingOverlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: white;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: Arial, sans-serif;
-  font-size: 18px;
-  color: #333;
-}
-
-.spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #007bff;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 15px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Layout principal */
-#containerAgenda {
-  display: flex;
-  gap: 20px;
-}
-
-.cards-grid {
-  flex: 0 0 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-  max-height: calc(100vh - 100px);
-}
-
-.card {
-  background-color: #fff;
-  font-size: 12px;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid teal;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 91%;
-}
-
-.card.status-concluido {
-  border-left-color: #50B09E;
-  opacity: 0.8;
-}
-
-.card.status-cancelado {
-  border-left-color: #dc3545;
-  opacity: 0.8;
-}
-
-.card h3 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: bold;
-}
-
-.card p {
-  margin: 2px 0;
-  line-height: 1.2;
-}
-
-.card-buttons {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-
-.card button,
-.card .btn-excluir {
-  padding: 4px 6px;
-  font-size: 11px;
-  border-radius: 4px;
-}
-
-
-
-/* Cabeçalho fixo */
-.header-card {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background-image: url(cover.png);
-  background-color: white;
-  background-size: contain;
-  background-position: right;
-  background-repeat: no-repeat;
-  width: 100%;
-  border-radius: 0;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: left;
-  justify-content: space-between;
-  gap: 4px;
-}
-
-.header-card button {
-  align-self: flex-start;
-  margin-top: 8px;
+.modal-content button{
   background-color: teal;
 }
 
-/* Visão diária */
-.daily-view-container {
-  flex: 2;
-  position: relative;
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  font-size: 14px; border: 1px solid #ddd; border-radius: 6px;
+  padding: 10px; background-color: #fdfdfd;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus {
+  border-color: #86b7fe; outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.close {
+  align-self: flex-end; font-size: 24px; cursor: pointer; color: salmon;
+}
+
+/* Loading */
+#loadingOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 1002; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.spinner { border: 6px solid #f3f3f3; border-top: 6px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Layout Principal e Cards da Esquerda */
+#containerAgenda { display: flex; gap: 20px; height: calc(100vh - 80px); }
+.cards-grid { flex: 0 0 300px; overflow-y: auto; padding-right: 10px; }
+.card { background-color: #fff; font-size: 12px; padding: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid teal; margin-bottom: 8px; }
+.card.status-concluido { border-left-color: #198754; }
+.card.status-cancelado { border-left-color: #dc3545; opacity: 0.8; }
+.card-buttons { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+.card button { padding: 4px 8px; font-size: 11px; border-radius: 4px; background-color: #007bff; }
+.btn-meet { background-color: #00796b; }
+.btn-whatsapp { background-color: #25D366; }
+.btn-confirm { background-color: #198754; }
+.btn-excluir { background-color: #dc3545; }
+.btn-disabled { background-color: #a0a0a0 !important; cursor: not-allowed; opacity: 0.7; }
+.status-select { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa; font-size: 12px; font-weight: bold; margin-top: 4px; }
+
+/* ======================================================= */
+/* --- SEÇÃO CORRIGIDA: VISÃO SEMANAL COM GRID --- */
+/* ======================================================= */
+.weekly-view-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background-color: white;
   border-radius: 8px;
-  padding: 10px;
-  overflow-y: auto;
-  max-height: calc(100vh - 100px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-.daily-view-header {
-  padding: 8px;
-  margin-bottom: 10px;
-  margin-top: 10px;
-  position: sticky;
-  background-color: white;
-  top: -10px;
-  z-index: 5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.week-header {
+  display: grid;
+  grid-template-columns: 50px repeat(7, 1fr); /* 1 coluna para horas, 7 para dias */
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f9fa;
 }
 
-.daily-view-header label {
-  font-weight: bold;
-  margin-right: 6px;
-}
-
-#selectedDate {
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  font-size: 12px;
-  max-width: 160px;
+.day-header {
   text-align: center;
+  padding: 8px 0;
+  border-left: 1px solid #eee;
+}
+.day-header.today { color: #007bff; }
+
+.week-body {
+  flex-grow: 1;
+  overflow: auto; /* Permite rolagem apenas do corpo da agenda */
+  display: grid;
+  grid-template-columns: 50px repeat(7, 1fr);
 }
 
-#dailyView {
-  position: relative;
-  height: 1020px; /* 17h * 60min = 1020px */
-  border-left: 1px solid #ccc;
-  margin-left: 50px;
-}
-
-.hour-slot {
-  position: relative;
-  height: 60px;
-  border-top: 1px dashed #ddd;
-}
-
-.hour-label {
-  position: absolute;
-  left: -50px; 
-  top: 0; 
-  transform: translateY(-50%); 
-  width: 40px;
+.timeline-labels {
+  text-align: right;
   font-size: 12px;
   color: #777;
-  text-align: right;
+}
+.timeline-labels .hour-label {
+  height: 60px;
   padding-right: 10px;
+  position: relative;
+  top: 2em;
+  box-sizing: border-box;
+}
+
+.day-column {
+  position: relative; /* Contexto para os blocos */
+  border-left: 1px solid #eee;
+}
+.day-column .hour-slot {
+  height: 60px;
+  box-sizing: border-box;
+  border-top: 1px dashed #eee;
 }
 
 .appointment-block {
   position: absolute;
-  left: 10px; 
-  right: 10px; 
-  background: #b9e4ff;
-  border-left: 5px solid #007bff;
-  padding: 6px;
-  border-radius: 4px;
-  font-size: 13px;
-  box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
-  box-sizing: border-box;
-  height: 60px;
+  left: 3px; right: 3px;
+  background: #e0f0ff;
+  border-left: 3px solid #007bff;
+  padding: 4px 6px; border-radius: 4px;
+  font-size: 12px; box-sizing: border-box;
+  overflow: hidden; z-index: 10;
 }
-
-/* Scrollbar discreta com cantos arredondados - WebKit */
-.cards-grid::-webkit-scrollbar,
-.daily-view-container::-webkit-scrollbar {
-  width: 5px;
-}
-
-.cards-grid::-webkit-scrollbar-track,
-.daily-view-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.cards-grid::-webkit-scrollbar-thumb,
-.daily-view-container::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-}
-
-/* Scrollbar para Firefox */
-.cards-grid,
-.daily-view-container {
-  overflow-y: auto;
-  scrollbar-width: none;
-  scrollbar-color: rgba(0,0,0,0.2) transparent;
-}
-
-/* Estilo para o botão do Google Meet */
-.btn-meet {
-  background-color: #00796b; /* Um tom de verde/azul */
-}
-
-.btn-meet:hover {
-  background-color: #004d40;
-}
-
-/* Estilo para o botão de Enviar via WhatsApp */
-.btn-whatsapp {
-  background-color: #25D366; /* Cor oficial do WhatsApp */
-}
-
-.btn-whatsapp:hover {
-  background-color: #128C7E;
-}
-
-/* Estilo para o botão de Confirmação */
-.btn-confirm {
-  background-color: #198754; /* Um tom de verde para confirmação */
-}
-
-.btn-confirm:hover {
-  background-color: #157347;
-}
-
-/* Estilo para a lista suspensa de status no card */
-.status-select {
-  width: 98%;
-  padding: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #f8f9fa;
-  font-size: 12px;
-  font-weight: bold;
-  margin-top: 4px;
-}
-
-/* Estilo para botões inativos/desabilitados */
-.btn-disabled {
-  background-color: #a0a0a0 !important; /* Cinza */
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* ============================================= */
-/* Estilos para os campos do formulário no Modal */
-/* ============================================= */
-
-/* Estilo geral para inputs, selects e textareas dentro do modal */
-.modal-content input,
-.modal-content select,
-.modal-content textarea {
-  font-size: 14px;
-  border: 1px solid #ddd;       /* Borda mais suave (cinza claro) */
-  border-radius: 6px;           /* Cantos arredondados */
-  padding: 10px;                /* Espaçamento interno para o texto respirar */
-  background-color: #fdfdfd;  /* Fundo levemente acinzentado */
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.07); /* Sombra interna sutil */
-  transition: border-color 0.2s, box-shadow 0.2s; /* Transição suave */
-}
-
-/* Efeito visual quando o usuário clica em um campo (foco) */
-.modal-content input:focus,
-.modal-content select:focus,
-.modal-content textarea:focus {
-  border-color: #86b7fe; /* Borda azul para indicar foco */
-  outline: 0; /* Remove a borda padrão do navegador */
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Sombra externa azulada (efeito de "glow") */
-}
-
