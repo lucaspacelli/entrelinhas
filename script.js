@@ -5,6 +5,125 @@ const HORA_FIM_DIA = 23;
 let listaPacientes = [];
 let _agendaData = [];
 
+// --- FUNÇÃO DE DATA PARA A VISÃO SEMANAL (CORRIGIDA) ---
+function getWeekRangeForDate(date) {
+    // Cria uma cópia da data para não modificar a original, zerando a hora
+    const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const dayOfWeek = start.getDay(); // 0 para Domingo
+    start.setDate(start.getDate() - dayOfWeek); // Retrocede para o Domingo da semana
+    
+    const week = [];
+    for (let i = 0; i < 7; i++) {
+        const nextDay = new Date(start);
+        nextDay.setDate(start.getDate() + i);
+        week.push(nextDay);
+    }
+    return week;
+}
+
+async function carregarDadosIniciais() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    try {
+        const [resAgenda, resPacientes] = await Promise.all([
+            fetch(`${API_URL}?action=agenda`),
+            fetch(API_URL)
+        ]);
+        window._agendaData = await resAgenda.json();
+        listaPacientes = await resPacientes.json();
+        
+        // Preenche os cards da esquerda primeiro
+        preencherCardsAgenda(window._agendaData);
+        
+        const hoje = new Date();
+        const inputData = document.getElementById('selectedDate');
+        inputData.value = toIsoDateLocal(hoje);
+        
+        // Preenche a visão da agenda (agora semanal)
+        preencherVisaoSemanal(window._agendaData, hoje);
+        
+        // Adiciona o "ouvinte" para quando a data for alterada
+        inputData.addEventListener('change', (e) => {
+            preencherVisaoSemanal(window._agendaData, parseIsoDateLocal(e.target.value));
+        });
+    } catch (err) {
+        console.error('Erro ao carregar dados iniciais:', err);
+        alert('Erro ao carregar dados iniciais!');
+    } finally {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+}
+
+// --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO DA AGENDA (REESCRITA E CORRIGIDA) ---
+function preencherVisaoSemanal(agenda, dataSelecionada) {
+    const container = document.getElementById('weeklyViewContainer');
+    container.innerHTML = ''; 
+
+    const semana = getWeekRangeForDate(dataSelecionada);
+    const hoje = new Date();
+    const diasNomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    // 1. Cria o cabeçalho (com os nomes dos dias)
+    let headerHtml = '<div class="week-header"><div class="blank-header"></div>'; // Canto vazio
+    semana.forEach(dia => {
+        const isHojeClass = sameDay(dia, hoje) ? 'today' : '';
+        headerHtml += `<div class="day-header ${isHojeClass}">${diasNomes[dia.getDay()]} ${dia.getDate()}</div>`;
+    });
+    headerHtml += '</div>';
+    
+    // 2. Cria o corpo da agenda (horas + colunas dos dias)
+    let bodyHtml = '<div class="week-body">';
+    // Coluna de horas
+    bodyHtml += '<div class="timeline-labels">';
+    for (let h = HORA_INICIO_DIA; h <= HORA_FIM_DIA; h++) {
+        bodyHtml += `<div class="hour-label">${String(h).padStart(2, '0')}:00</div>`;
+    }
+    bodyHtml += '</div>';
+
+    // Colunas dos dias
+    semana.forEach(dia => {
+        bodyHtml += `<div class="day-column" data-date="${toIsoDateLocal(dia)}">`;
+        for (let h = HORA_INICIO_DIA; h <= HORA_FIM_DIA; h++) {
+            bodyHtml += '<div class="hour-slot"></div>';
+        }
+        bodyHtml += '</div>';
+    });
+    bodyHtml += '</div>';
+
+    container.innerHTML = headerHtml + bodyHtml;
+
+    // 3. Filtra e posiciona os compromissos da semana inteira
+    const inicioSemana = semana[0];
+    const fimSemana = new Date(semana[6]);
+    fimSemana.setHours(23, 59, 59);
+
+    const compromissosDaSemana = agenda.filter(item => {
+        const dataItem = parseDataHora(item.Sessão);
+        return dataItem >= inicioSemana && dataItem <= fimSemana;
+    });
+
+    compromissosDaSemana.forEach(item => {
+        const data = parseDataHora(item.Sessão);
+        const diaISO = toIsoDateLocal(data);
+        const dayColumnTarget = container.querySelector(`.day-column[data-date="${diaISO}"]`);
+
+        if (dayColumnTarget) {
+            const offsetMin = (data.getHours() * 60 + data.getMinutes()) - (HORA_INICIO_DIA * 60);
+            if (offsetMin < 0) return;
+
+            const bloco = document.createElement('div');
+            bloco.className = 'appointment-block';
+            bloco.style.top = `${offsetMin}px`;
+            bloco.style.height = `58px`;
+            const horaFormatada = data.toTimeString().slice(0, 5);
+            bloco.innerHTML = `<strong>${item.Paciente}</strong><br>${horaFormatada}`;
+            dayColumnTarget.appendChild(bloco);
+        }
+    });
+}
+
+
+// --- RESTANTE DAS FUNÇÕES (completas e sem alterações, como no seu arquivo) ---
+
 async function salvarStatus(selectElement, appointmentId) {
   const novoStatus = selectElement.value;
   selectElement.style.opacity = '0.5';
@@ -47,32 +166,6 @@ function formatarTelefoneParaWhatsApp(telefone) {
   return null;
 }
 
-async function carregarDadosIniciais() {
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  try {
-    const [resAgenda, resPacientes] = await Promise.all([
-      fetch(`${API_URL}?action=agenda`),
-      fetch(API_URL)
-    ]);
-    window._agendaData = await resAgenda.json();
-    listaPacientes = await resPacientes.json();
-    window._agendaData.sort((a, b) => parseDataHora(a.Sessão) - parseDataHora(b.Sessão));
-    preencherCardsAgenda(window._agendaData);
-    const hojeIso = toIsoDateLocal(new Date());
-    const inputData = document.getElementById('selectedDate');
-    inputData.value = hojeIso;
-    preencherVisaoDiaria(window._agendaData, parseIsoDateLocal(hojeIso));
-    inputData.addEventListener('change', () => {
-      preencherVisaoDiaria(window._agendaData, parseIsoDateLocal(inputData.value));
-    });
-  } catch (err) {
-    console.error('Erro ao carregar dados iniciais:', err);
-    alert('Erro ao carregar dados iniciais!');
-  } finally {
-    document.getElementById('loadingOverlay').style.display = 'none';
-  }
-}
-
 function popularPacientesDropdown(pacienteSelecionado = '') {
   const select = document.getElementById('agendaPaciente');
   select.innerHTML = '<option value="">-- Selecione um paciente --</option>';
@@ -89,6 +182,8 @@ function popularPacientesDropdown(pacienteSelecionado = '') {
 function preencherCardsAgenda(agenda) {
     const cardsContainer = document.getElementById('cardsContainer');
     cardsContainer.innerHTML = '';
+    // Ordena por data antes de inverter, para garantir que os mais recentes fiquem em cima
+    agenda.sort((a, b) => parseDataHora(a.Sessão) - parseDataHora(b.Sessão));
     agenda.slice().reverse().forEach((item) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -134,16 +229,7 @@ function preencherCardsAgenda(agenda) {
         sessaoFormatadaParaDisplay = `${dia}/${mes}/${ano} ${hora}`;
       }
   
-      card.innerHTML = `
-        <h3>${item.Paciente}</h3>
-        <p><strong>Sessão:</strong> ${sessaoFormatadaParaDisplay}</p>
-        <select class="status-select" onchange="salvarStatus(this, ${item.ID})">
-          ${gerarOpcoesStatus(statusAtual)}
-        </select>
-        <div class="card-buttons">
-          ${botaoConfirmacao} ${botaoEnviarLink} ${botaoMeet} ${botaoEditar} ${botaoExcluir}
-        </div>
-      `;
+      card.innerHTML = `<h3>${item.Paciente}</h3><p><strong>Sessão:</strong> ${sessaoFormatadaParaDisplay}</p><select class="status-select" onchange="salvarStatus(this, ${item.ID})">${gerarOpcoesStatus(statusAtual)}</select><div class="card-buttons">${botaoConfirmacao} ${botaoEnviarLink} ${botaoMeet} ${botaoEditar} ${botaoExcluir}</div>`;
       cardsContainer.appendChild(card);
     });
     cardsContainer.scrollTop = 0;
@@ -221,35 +307,6 @@ document.getElementById("formAgenda").addEventListener("submit", function (e) {
       carregarDadosIniciais();
     });
 });
-
-function preencherVisaoDiaria(agenda, diaSelecionado) {
-    const dailyView = document.getElementById('dailyView');
-    dailyView.innerHTML = '';
-    for (let hora = HORA_INICIO_DIA; hora <= HORA_FIM_DIA; hora++) {
-      const slot = document.createElement('div');
-      slot.className = 'hour-slot';
-      slot.innerHTML = `<div class="hour-label">${String(hora).padStart(2, '0')}:00</div>`;
-      dailyView.appendChild(slot);
-    }
-    const doDia = agenda.filter(item => {
-      const dataItem = parseDataHora(item.Sessão);
-      return sameDay(dataItem, diaSelecionado);
-    });
-    doDia.forEach(item => {
-      const data = parseDataHora(item.Sessão);
-      if (isNaN(data.getTime())) return;
-      const horaFormatada = data.toTimeString().slice(0, 5);
-      const diaFormatado = `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
-      const offsetMin = (data.getHours() - HORA_INICIO_DIA) * 60 + data.getMinutes();
-      if (offsetMin < 0 || offsetMin > (HORA_FIM_DIA - HORA_INICIO_DIA + 1) * 60) return;
-      const bloco = document.createElement('div');
-      bloco.className = 'appointment-block';
-      bloco.style.top = `${offsetMin + 1}px`;
-      bloco.style.height = `${60 - 2}px`;
-      bloco.innerHTML = `<strong>${item.Paciente}</strong><br>${diaFormatado} ${horaFormatada}`;
-      dailyView.appendChild(bloco);
-    });
-}
 
 function parseDataHora(dataStr) {
     if (!dataStr) return new Date(NaN);
