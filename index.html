@@ -15,11 +15,18 @@
   </div>
 
   <div class="header-card">
-    <h1><img src="ico.png" style="width: 40px; vertical-align: middle;">  Agenda</h1>
-    <div class="header-controls">
+    <div class="header-left">
+      <h1><img src="ico.png" style="width: 40px; vertical-align: middle;"> Agenda</h1>
+    </div>
+  
+    <div class="header-center">
       <input type="date" id="selectedDate">
-      <a href="pacientes.html"><button>Pacientes</button></a>
       <button id="btnNovo" onclick="novoAgendamento()">+ Novo Agendamento</button>
+    </div>
+  
+    <div class="header-right">
+      <a href="pacientes.html"><button>Pacientes</button></a>
+      <a href="configuracoes.html"><button title="Configurações"><i class="fas fa-cog"></i></button></a>
     </div>
   </div>
 

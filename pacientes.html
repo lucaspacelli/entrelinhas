@@ -15,31 +15,45 @@
   </div>
 
   <div class="header-card">
-    <h1><img src="ico.png" style="width: 50px; vertical-align: middle;">  Pacientes</h1>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="index.html"><button>Agenda</button></a>
-        <button id="btnNovo" onclick="novoCadastro()" class="botao-verde">+ Novo Paciente</button>
+    <div class="header-left">
+      <h1><img src="ico.png" style="width: 50px; vertical-align: middle;"> Pacientes</h1>
+    </div>
+  
+    <div class="header-center">
+      <button id="btnNovo" onclick="novoCadastro()" class="botao-verde">+ Novo Paciente</button>
+    </div>
+  
+    <div class="header-right">
+      <a href="index.html"><button>Agenda</button></a>
+      <a href="configuracoes.html"><button title="Configurações"><i class="fas fa-cog"></i></button></a>
     </div>
   </div>
 
   <div id="containerPrincipal" style="display: flex; gap: 20px;">
-    <div id="cardsContainerCadastros" class="cards-grid">
+    <div class="lista-pacientes-container">
+      <div class="filtro-container">
+        <i class="fas fa-search"></i>
+        <input type="search" id="inputFiltro" placeholder="Filtrar por nome ou apelido...">
       </div>
+      <div id="cardsContainerCadastros" class="cards-grid">
+        </div>
+    </div>
 
     <div id="containerEvolucao" class="daily-view-container">
       <div class="card" style="padding: 20px; text-align: center;">
         <p><strong>Selecione um paciente na lista à esquerda para ver sua evolução.</strong></p>
       </div>
     </div>
-  </div>
 
   <div id="modal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="fecharModal()">&times;</span>
-      <h2 id="modalTitulo"><strong>Novo Paciente</strong></h2>
+      <h2 id="modalTitulo">Novo Paciente</h2>
       <form id="formCadastro">
         <input type="hidden" id="inputId">
         <label>Paciente: <input type="text" id="inputPaciente" required></label>
+        <label>Como gosta de ser chamado: <input type="text" id="inputApelido"></label>
+        
         <label>Valor: <input type="text" id="inputValor" required></label>
         <label>Data de Reajuste: <input type="date" id="inputData" required></label>
         <label>Situação:
@@ -49,7 +63,7 @@
           </select>
         </label>
         <label>Telefone: <input type="text" id="inputTelefone"></label>
-        <button type="submit" class="botao-verde">Salvar</button>
+        <button id="btnNovo" type="submit" class="botao-verde">Salvar</button>
       </form>
     </div>
   </div>

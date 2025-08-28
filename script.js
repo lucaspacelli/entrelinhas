@@ -1,17 +1,14 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbxjVk4pa9zfDoU9HQGA2Cl8AzhsKTm6F89sdaBYw4U4kpKkNF67U46a_hys_47m7jeW/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx3qSIUSCE7Uw41oRsmgXmEJyZXSkiA_97lz5wPtk4a673kuU4dFXC7MB_yzvMlJr88/exec';
 
 const HORA_INICIO_DIA = 7;
 const HORA_FIM_DIA = 23;
 let listaPacientes = [];
 let _agendaData = [];
+let configuracoes = {};
 
-// --- FUNÇÃO DE DATA PARA A VISÃO SEMANAL (CORRIGIDA) ---
 function getWeekRangeForDate(date) {
-    // Cria uma cópia da data para não modificar a original, zerando a hora
     const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const dayOfWeek = start.getDay(); // 0 para Domingo
-    start.setDate(start.getDate() - dayOfWeek); // Retrocede para o Domingo da semana
-    
+    start.setDate(start.getDate() - start.getDay());
     const week = [];
     for (let i = 0; i < 7; i++) {
         const nextDay = new Date(start);
@@ -24,25 +21,19 @@ function getWeekRangeForDate(date) {
 async function carregarDadosIniciais() {
     document.getElementById('loadingOverlay').style.display = 'flex';
     try {
-        const [resAgenda, resPacientes] = await Promise.all([
+        const [resAgenda, resPacientes, resConfig] = await Promise.all([
             fetch(`${API_URL}?action=agenda`),
-            fetch(API_URL)
+            fetch(API_URL),
+            fetch(`${API_URL}?action=getConfig`)
         ]);
         window._agendaData = await resAgenda.json();
         listaPacientes = await resPacientes.json();
-        
-        // Preenche os cards da esquerda primeiro
+        configuracoes = await resConfig.json();
         preencherCardsAgenda(window._agendaData);
-        
         const hoje = new Date();
-        const inputData = document.getElementById('selectedDate');
-        inputData.value = toIsoDateLocal(hoje);
-        
-        // Preenche a visão da agenda (agora semanal)
+        document.getElementById('selectedDate').value = toIsoDateLocal(hoje);
         preencherVisaoSemanal(window._agendaData, hoje);
-        
-        // Adiciona o "ouvinte" para quando a data for alterada
-        inputData.addEventListener('change', (e) => {
+        document.getElementById('selectedDate').addEventListener('change', (e) => {
             preencherVisaoSemanal(window._agendaData, parseIsoDateLocal(e.target.value));
         });
     } catch (err) {
@@ -53,33 +44,24 @@ async function carregarDadosIniciais() {
     }
 }
 
-// --- FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO DA AGENDA (REESCRITA E CORRIGIDA) ---
 function preencherVisaoSemanal(agenda, dataSelecionada) {
     const container = document.getElementById('weeklyViewContainer');
-    container.innerHTML = ''; 
-
+    container.innerHTML = '';
     const semana = getWeekRangeForDate(dataSelecionada);
     const hoje = new Date();
     const diasNomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
-    // 1. Cria o cabeçalho (com os nomes dos dias)
-    let headerHtml = '<div class="week-header"><div class="blank-header"></div>'; // Canto vazio
+    let headerHtml = '<div class="week-header"><div class="blank-header"></div>';
     semana.forEach(dia => {
         const isHojeClass = sameDay(dia, hoje) ? 'today' : '';
         headerHtml += `<div class="day-header ${isHojeClass}">${diasNomes[dia.getDay()]} ${dia.getDate()}</div>`;
     });
     headerHtml += '</div>';
-    
-    // 2. Cria o corpo da agenda (horas + colunas dos dias)
     let bodyHtml = '<div class="week-body">';
-    // Coluna de horas
     bodyHtml += '<div class="timeline-labels">';
     for (let h = HORA_INICIO_DIA; h <= HORA_FIM_DIA; h++) {
         bodyHtml += `<div class="hour-label">${String(h).padStart(2, '0')}:00</div>`;
     }
     bodyHtml += '</div>';
-
-    // Colunas dos dias
     semana.forEach(dia => {
         bodyHtml += `<div class="day-column" data-date="${toIsoDateLocal(dia)}">`;
         for (let h = HORA_INICIO_DIA; h <= HORA_FIM_DIA; h++) {
@@ -88,28 +70,21 @@ function preencherVisaoSemanal(agenda, dataSelecionada) {
         bodyHtml += '</div>';
     });
     bodyHtml += '</div>';
-
     container.innerHTML = headerHtml + bodyHtml;
-
-    // 3. Filtra e posiciona os compromissos da semana inteira
     const inicioSemana = semana[0];
     const fimSemana = new Date(semana[6]);
     fimSemana.setHours(23, 59, 59);
-
     const compromissosDaSemana = agenda.filter(item => {
         const dataItem = parseDataHora(item.Sessão);
         return dataItem >= inicioSemana && dataItem <= fimSemana;
     });
-
     compromissosDaSemana.forEach(item => {
         const data = parseDataHora(item.Sessão);
         const diaISO = toIsoDateLocal(data);
         const dayColumnTarget = container.querySelector(`.day-column[data-date="${diaISO}"]`);
-
         if (dayColumnTarget) {
             const offsetMin = (data.getHours() * 60 + data.getMinutes()) - (HORA_INICIO_DIA * 60);
             if (offsetMin < 0) return;
-
             const bloco = document.createElement('div');
             bloco.className = 'appointment-block';
             bloco.style.top = `${offsetMin}px`;
@@ -120,9 +95,6 @@ function preencherVisaoSemanal(agenda, dataSelecionada) {
         }
     });
 }
-
-
-// --- RESTANTE DAS FUNÇÕES (completas e sem alterações, como no seu arquivo) ---
 
 async function salvarStatus(selectElement, appointmentId) {
   const novoStatus = selectElement.value;
@@ -182,7 +154,6 @@ function popularPacientesDropdown(pacienteSelecionado = '') {
 function preencherCardsAgenda(agenda) {
     const cardsContainer = document.getElementById('cardsContainer');
     cardsContainer.innerHTML = '';
-    // Ordena por data antes de inverter, para garantir que os mais recentes fiquem em cima
     agenda.sort((a, b) => parseDataHora(a.Sessão) - parseDataHora(b.Sessão));
     agenda.slice().reverse().forEach((item) => {
       const card = document.createElement('div');
@@ -205,20 +176,26 @@ function preencherCardsAgenda(agenda) {
         const horaSessao = dataSessao.toTimeString().slice(0, 5);
         const dataFormatada = `${String(dataSessao.getDate()).padStart(2,'0')}/${String(dataSessao.getMonth()+1).padStart(2,'0')}/${dataSessao.getFullYear()}`;
         const textoData = sameDay(dataSessao, new Date()) ? `hoje às ${horaSessao}h` : `para o dia ${dataFormatada} às ${horaSessao}h`;
-        const msgConfirmacao = `Olá, tudo bem? Estou entrando em contato para confirmar nossa sessão agendada para ${textoData}.\n\nPara garantir a realização da sessão, solicito que o pagamento seja realizado por meio do Pix, utilizando a seguinte chave: psi.andressaferreira@gmail.com\n\nAguardo o seu retorno para encaminhar o link de acesso! Até mais`;
+        const nomeParaMensagem = (infoPaciente && infoPaciente.Apelido) ? infoPaciente.Apelido : item.Paciente.split(' ')[0];
+        const msgConfirmacao = (configuracoes.msg_confirmacao || "")
+            .replace('{paciente}', item.Paciente)
+            .replace('{apelido}', nomeParaMensagem)
+            .replace('{data_hora}', textoData)
+            .replace('{chave_pix}', configuracoes.chave_pix || '');
         const urlConfirmacao = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msgConfirmacao)}`;
         botaoConfirmacao = `<a href="${urlConfirmacao}" target="_blank" rel="noopener noreferrer"><button class="btn-confirm ${desabilitarConfirmacao ? 'btn-disabled' : ''}" ${desabilitarConfirmacao ? 'disabled' : ''}><i class="fas fa-check"></i> Confirmação</button></a>`;
       }
       if (telefoneFormatado && linkMeet) {
-        const msgLink = `Muito obrigada! Segue o link para a nossa sessão. Estarei lhe aguardando, até mais!\n\n${linkMeet}`;
+        const msgLink = (configuracoes.msg_link || "").replace('{link_meet}', linkMeet);
         const urlLink = `https://wa.me/${telefoneFormatado}?text=${encodeURIComponent(msgLink)}`;
-        botaoEnviarLink = `<a href="${urlLink}" target="_blank" rel="noopener noreferrer"><button class="btn-whatsapp ${desabilitarAcoesOnline ? 'btn-disabled' : ''}" ${desabilitarAcoesOnline ? 'disabled' : ''}><i class="fab fa-whatsapp"></i> Enviar Link</button></a>`;
+        botaoEnviarLink = `<a href="${urlLink}" target="_blank" rel="noopener noreferrer"><button id='btn-whatsapp' class="btn-whatsapp ${desabilitarAcoesOnline ? 'btn-disabled' : ''}" ${desabilitarAcoesOnline ? 'disabled' : ''}><i class="fab fa-whatsapp"></i> Enviar Link</button></a>`;
       }
       if (linkMeet) {
         botaoMeet = `<a href="${linkMeet}" target="_blank" rel="noopener noreferrer"><button class="btn-meet ${desabilitarAcoesOnline ? 'btn-disabled' : ''}" ${desabilitarAcoesOnline ? 'disabled' : ''}><i class="fas fa-video"></i> Entrar na Sala</button></a>`;
       }
-      const botaoEditar = `<button onclick="editarAgenda(${item.ID})"><i class="fas fa-edit"></i> Editar</button>`;
-      const botaoExcluir = `<button class="btn-excluir" onclick="excluirAgenda(${item.ID})"><i class="fas fa-trash"></i> Excluir</button>`;
+      // Adicionada a classe .btn-editar para estilização
+      const botaoEditar = `<button class="btn-editar" onclick="editarAgenda(${item.ID})"><i class="fas fa-edit"></i> Editar</button>`;
+      const botaoExcluir = `<button id='btnDel' class="btn-excluir" onclick="excluirAgenda(${item.ID})"><i class="fas fa-trash"></i> Excluir</button>`;
       
       let sessaoFormatadaParaDisplay = item.Sessão;
       if (!isNaN(dataSessao.getTime())) {

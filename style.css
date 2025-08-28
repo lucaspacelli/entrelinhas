@@ -139,3 +139,77 @@ button:hover { opacity: 0.9; }
   font-size: 12px; box-sizing: border-box;
   overflow: hidden; z-index: 10;
 }
+
+/* ============================================= */
+/* --- CORES PERSONALIZADAS PARA OS BOTÕES DO CARD --- */
+/* ============================================= */
+
+/* Cor Padrão para botões sem classe específica (Editar) */
+.card button {
+  background-color: #2B7EE9; /* Azul */
+}
+
+/* Botão de Confirmação */
+.btn-confirm {
+  background-color: #008080; /* Verde Água */
+}
+
+/* Botão de Enviar Link (WhatsApp) */
+#btn-whatsapp {
+  background-color: #1DAA61; /* Verde WhatsApp */
+}
+
+/* Botão de Entrar na Sala (Meet) */
+.btn-meet {
+  background-color: #2B7EE9; /* Azul */
+}
+
+/* Botão de Excluir */
+#btnDel {
+  background-color: #E15C68; /* Vermelho/Rosa */
+}
+
+/* Efeito Hover (escurece um pouco a cor ao passar o mouse) */
+.card button:hover { opacity: 0.85; }
+
+/* Ajuste para botões que contêm apenas ícones */
+.header-controls button i.fas {
+    font-size: 16px; /* Tamanho do ícone */
+    margin: 0 2px; /* Pequeno ajuste de espaçamento */
+  }
+
+
+/* Garante que o container principal use todo o espaço */
+.header-card {
+    justify-content: space-between; /* Essencial para o layout Esquerda-Centro-Direita */
+  }
+  
+  /* Define que cada grupo também organize seus itens internos */
+  .header-left,
+  .header-center,
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaçamento entre itens dentro de cada grupo */
+  }
+  
+  /* Garante que o grupo do meio (center) não seja espremido */
+  .header-center {
+    flex-grow: 1;
+    justify-content: center; /* Centraliza os itens dentro do grupo do meio */
+  }
+  
+  /* Garante que o grupo da esquerda não cresça desnecessariamente */
+  .header-left {
+      flex-shrink: 0;
+  }
+  
+  /* Garante que o H1 não tenha margens que atrapalhem o alinhamento */
+  .header-left h1 {
+    margin: 0;
+  }
+
+  /* Depois (regra corrigida e mais abrangente) */
+.header-card button { 
+    background-color: teal; 
+  }
