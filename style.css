@@ -1,0 +1,215 @@
+/* Estilos Gerais */
+html, body { height: 100vh; overflow: hidden; }
+body { font-family: Arial, sans-serif; padding: 20px; padding-top: 80px; box-sizing: border-box; background-color: #f4f7f6; }
+h1, h2 { margin: 0; padding: 0; font-size: 22px; color: darkslategrey; }
+h3 { margin: 0; font-size: 14px; font-weight: bold; }
+p { margin: 4px 0; }
+button { padding: 8px 14px; font-size: 14px; color: white; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+button:hover { opacity: 0.9; }
+
+/* Cabeçalho Fixo */
+.header-card { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background-color: white; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 20px; box-sizing: border-box; }
+.header-controls { display: flex; align-items: center; gap: 10px; }
+.header-controls button { background-color: teal; }
+#btnNovo { background-color: #198754; }
+#selectedDate { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+
+/* Modal e seus campos */
+.modal {
+  display: none; position: fixed; z-index: 999;
+  left: 0; top: 0; width: 100%; height: 100%;
+  overflow: auto; background-color: rgba(0, 0, 0, 0.5);
+  align-items: flex-start; justify-content: center;
+  padding-top: 100px;
+}
+.modal-content {
+  background-color: #fff; padding: 10px; border-radius: 6px;
+  width: 90%; max-width: 1000px; display: flex;
+  flex-direction: column; gap: 12px;
+}
+.modal-content label {
+  display: flex; flex-direction: column; padding: 5px;
+}
+
+.modal-content button{
+  background-color: teal;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  font-size: 14px; border: 1px solid #ddd; border-radius: 6px;
+  padding: 10px; background-color: #fdfdfd;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus {
+  border-color: #86b7fe; outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.close {
+  align-self: flex-end; font-size: 24px; cursor: pointer; color: salmon;
+}
+
+/* Loading */
+#loadingOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 1002; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.spinner { border: 6px solid #f3f3f3; border-top: 6px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Layout Principal e Cards da Esquerda */
+#containerAgenda { display: flex; gap: 20px; height: calc(100vh - 80px); }
+.cards-grid { flex: 0 0 300px; overflow-y: auto; padding-right: 10px; }
+.card { background-color: #fff; font-size: 12px; padding: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid teal; margin-bottom: 8px; }
+.card.status-concluido { border-left-color: #198754; }
+.card.status-cancelado { border-left-color: #dc3545; opacity: 0.8; }
+.card-buttons { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+.card button { padding: 4px 8px; font-size: 11px; border-radius: 4px; background-color: #007bff; }
+.btn-meet { background-color: #00796b; }
+.btn-whatsapp { background-color: #25D366; }
+.btn-confirm { background-color: #198754; }
+.btn-excluir { background-color: #dc3545; }
+.btn-disabled { background-color: #a0a0a0 !important; cursor: not-allowed; opacity: 0.7; }
+.status-select { width: 100%; padding: 5px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa; font-size: 12px; font-weight: bold; margin-top: 4px; }
+
+/* ======================================================= */
+/* --- SEÇÃO CORRIGIDA: VISÃO SEMANAL COM GRID --- */
+/* ======================================================= */
+.weekly-view-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.week-header {
+  display: grid;
+  grid-template-columns: 50px repeat(7, 1fr); /* 1 coluna para horas, 7 para dias */
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f9fa;
+}
+
+.day-header {
+  text-align: center;
+  padding: 8px 0;
+  border-left: 1px solid #eee;
+}
+.day-header.today { color: #007bff; }
+
+.week-body {
+  flex-grow: 1;
+  overflow: auto; /* Permite rolagem apenas do corpo da agenda */
+  display: grid;
+  grid-template-columns: 50px repeat(7, 1fr);
+}
+
+.timeline-labels {
+  text-align: right;
+  font-size: 12px;
+  color: #777;
+}
+.timeline-labels .hour-label {
+  height: 60px;
+  padding-right: 10px;
+  position: relative;
+  top: 2em;
+  box-sizing: border-box;
+}
+
+.day-column {
+  position: relative; /* Contexto para os blocos */
+  border-left: 1px solid #eee;
+}
+.day-column .hour-slot {
+  height: 60px;
+  box-sizing: border-box;
+  border-top: 1px dashed #eee;
+}
+
+.appointment-block {
+  position: absolute;
+  left: 3px; right: 3px;
+  background: #e0f0ff;
+  border-left: 3px solid #007bff;
+  padding: 4px 6px; border-radius: 4px;
+  font-size: 12px; box-sizing: border-box;
+  overflow: hidden; z-index: 10;
+}
+
+/* ============================================= */
+/* --- CORES PERSONALIZADAS PARA OS BOTÕES DO CARD --- */
+/* ============================================= */
+
+/* Cor Padrão para botões sem classe específica (Editar) */
+.card button {
+  background-color: #2B7EE9; /* Azul */
+}
+
+/* Botão de Confirmação */
+.btn-confirm {
+  background-color: #008080; /* Verde Água */
+}
+
+/* Botão de Enviar Link (WhatsApp) */
+#btn-whatsapp {
+  background-color: #1DAA61; /* Verde WhatsApp */
+}
+
+/* Botão de Entrar na Sala (Meet) */
+.btn-meet {
+  background-color: #2B7EE9; /* Azul */
+}
+
+/* Botão de Excluir */
+#btnDel {
+  background-color: #E15C68; /* Vermelho/Rosa */
+}
+
+/* Efeito Hover (escurece um pouco a cor ao passar o mouse) */
+.card button:hover { opacity: 0.85; }
+
+/* Ajuste para botões que contêm apenas ícones */
+.header-controls button i.fas {
+    font-size: 16px; /* Tamanho do ícone */
+    margin: 0 2px; /* Pequeno ajuste de espaçamento */
+  }
+
+
+/* Garante que o container principal use todo o espaço */
+.header-card {
+    justify-content: space-between; /* Essencial para o layout Esquerda-Centro-Direita */
+  }
+  
+  /* Define que cada grupo também organize seus itens internos */
+  .header-left,
+  .header-center,
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaçamento entre itens dentro de cada grupo */
+  }
+  
+  /* Garante que o grupo do meio (center) não seja espremido */
+  .header-center {
+    flex-grow: 1;
+    justify-content: center; /* Centraliza os itens dentro do grupo do meio */
+  }
+  
+  /* Garante que o grupo da esquerda não cresça desnecessariamente */
+  .header-left {
+      flex-shrink: 0;
+  }
+  
+  /* Garante que o H1 não tenha margens que atrapalhem o alinhamento */
+  .header-left h1 {
+    margin: 0;
+  }
+
+  /* Depois (regra corrigida e mais abrangente) */
+.header-card button { 
+    background-color: teal; 
+  }

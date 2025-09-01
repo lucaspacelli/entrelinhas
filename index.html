@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agenda de Sessões</title>
+  <link href="ico.png" rel="icon" type="image/x-icon"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Carregando agenda...</p>
+  </div>
+
+  <div class="header-card">
+    <div class="header-left">
+      <h1><img src="ico.png" style="width: 40px; vertical-align: middle;"> Agenda</h1>
+    </div>
+  
+    <div class="header-center">
+      <input type="date" id="selectedDate">
+      <button id="btnNovo" onclick="novoAgendamento()">+ Novo Agendamento</button>
+    </div>
+  
+    <div class="header-right">
+      <a href="pacientes.html"><button>Pacientes</button></a>
+      <a href="configuracoes.html"><button title="Configurações"><i class="fas fa-cog"></i></button></a>
+    </div>
+  </div>
+
+  <div id="containerAgenda">
+    <div id="cardsContainer" class="cards-grid"></div>
+    <div id="weeklyViewContainer" class="weekly-view-wrapper">
+      </div>
+  </div>
+
+  <div id="modalAgenda" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModalAgenda()">&times;</span>
+      <h2 id="modalTitulo">Editar Compromisso</h2>
+      <form id="formAgenda">
+        <input type="hidden" id="agendaId">
+        <label>Paciente:
+          <select id="agendaPaciente" required></select>
+        </label>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <label style="flex: 1; min-width: 150px;">Data da Sessão:
+                <input type="date" id="agendaData" required>
+            </label>
+            <label style="flex: 1; min-width: 150px;">Hora da Sessão:
+                <input type="time" id="agendaHora" required step="900"></label>
+        </div>
+        <label>Data do Pagamento:
+          <input type="date" id="agendaPagamento">
+        </label>
+        <label>Prontuário:
+          <textarea id="agendaProntuario" rows="10" style="resize: vertical;"></textarea>
+        </label>
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    
+      if (typeof firebase === 'undefined') {
+        console.error("Firebase SDK não carregou. Verifique sua conexão ou possíveis bloqueadores de script.");
+        alert("ERRO: A biblioteca do Firebase não conseguiu carregar.\n\nPor favor, verifique sua conexão com a internet e desative temporariamente qualquer bloqueador de anúncios (AdBlock, etc.) nesta página, depois recarregue com Ctrl+Shift+R.");
+        document.getElementById('loadingOverlay').style.display = 'none'; // Esconde o loading
+        return;
+      }
+
+      try {
+        // COLE A SUA CONFIGURAÇÃO DO FIREBASE AQUI
+          const firebaseConfig = {
+            apiKey: "AIzaSyAgw7ffBCDw3QZFSBaQp-KFQAMe8WZPov8",
+            authDomain: "psi-entrelinhas.firebaseapp.com",
+            projectId: "psi-entrelinhas",
+            storageBucket: "psi-entrelinhas.firebasestorage.app",
+            messagingSenderId: "63675985445",
+            appId: "1:63675985445:web:f0effcb0f64639442b19cc"
+          };
+
+        firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore(); 
+        
+        if (typeof carregarDadosIniciais === 'function') {
+          carregarDadosIniciais();
+        } else if (typeof carregarConfiguracoes === 'function') {
+          carregarConfiguracoes();
+        }
+
+      } catch (e) {
+        console.error("Erro CRÍTICO ao inicializar o Firebase:", e);
+        alert("Não foi possível conectar ao banco de dados. Verifique se o objeto 'firebaseConfig' está correto.");
+      }
+    });
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>
