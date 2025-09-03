@@ -63,43 +63,41 @@
     </div>
   </div>
 
+  <script src="script.js"></script> 
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    
-      if (typeof firebase === 'undefined') {
-        console.error("Firebase SDK não carregou. Verifique sua conexão ou possíveis bloqueadores de script.");
-        alert("ERRO: A biblioteca do Firebase não conseguiu carregar.\n\nPor favor, verifique sua conexão com a internet e desative temporariamente qualquer bloqueador de anúncios (AdBlock, etc.) nesta página, depois recarregue com Ctrl+Shift+R.");
-        document.getElementById('loadingOverlay').style.display = 'none'; // Esconde o loading
-        return;
+    // ===============================================================
+    //       COLE A SUA CONFIGURAÇÃO DO FIREBASE (firebaseConfig) AQUI
+    // ===============================================================
+    const firebaseConfig = {
+  apiKey: "AIzaSyAgw7ffBCDw3QZFSBaQp-KFQAMe8WZPov8",
+  authDomain: "psi-entrelinhas.firebaseapp.com",
+  projectId: "psi-entrelinhas",
+  storageBucket: "psi-entrelinhas.firebasestorage.app",
+  messagingSenderId: "63675985445",
+  appId: "1:63675985445:web:f0effcb0f64639442b19cc"
+};
+    // ===============================================================
+
+    // Inicializa o Firebase e torna o 'db' acessível globalmente
+    try {
+      firebase.initializeApp(firebaseConfig);
+      window.db = firebase.firestore();
+      console.log("Firebase inicializado com sucesso!");
+
+      // Chama a função de carregamento da página específica
+      if (typeof carregarDadosIniciais === 'function') {
+        carregarDadosIniciais();
+      } else if (typeof carregarConfiguracoes === 'function') {
+        carregarConfiguracoes();
       }
-
-      try {
-        // COLE A SUA CONFIGURAÇÃO DO FIREBASE AQUI
-          const firebaseConfig = {
-            apiKey: "AIzaSyAgw7ffBCDw3QZFSBaQp-KFQAMe8WZPov8",
-            authDomain: "psi-entrelinhas.firebaseapp.com",
-            projectId: "psi-entrelinhas",
-            storageBucket: "psi-entrelinhas.firebasestorage.app",
-            messagingSenderId: "63675985445",
-            appId: "1:63675985445:web:f0effcb0f64639442b19cc"
-          };
-
-        firebase.initializeApp(firebaseConfig);
-        window.db = firebase.firestore(); 
-        
-        if (typeof carregarDadosIniciais === 'function') {
-          carregarDadosIniciais();
-        } else if (typeof carregarConfiguracoes === 'function') {
-          carregarConfiguracoes();
-        }
-
-      } catch (e) {
-        console.error("Erro CRÍTICO ao inicializar o Firebase:", e);
-        alert("Não foi possível conectar ao banco de dados. Verifique se o objeto 'firebaseConfig' está correto.");
-      }
-    });
+    } catch (e) {
+      console.error("Erro CRÍTICO ao inicializar o Firebase:", e);
+      alert("Não foi possível inicializar o Firebase. Verifique se o objeto 'firebaseConfig' está correto no seu HTML.");
+    }
   </script>
 
-  <script src="script.js"></script>
 </body>
 </html>

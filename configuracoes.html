@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Configurações</title>
+    <link href="ico.png" rel="icon" type="image/x-icon"/>
+    <link rel="stylesheet" href="configuracoes.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div id="loadingOverlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <div class="header-card">
+        <h1><img src="ico.png" style="width: 50px; vertical-align: middle;"> Configurações</h1>
+        <div>
+            <a href="index.html"><button>Agenda</button></a>
+            <a href="pacientes.html"><button>Pacientes</button></a>
+        </div>
+    </div>
+
+    <div class="container">
+        <form id="formConfig">
+            <h2>Dados Profissionais</h2>
+            <label>Nome do Psicólogo(a):
+                <input type="text" id="nome_psicologo" required>
+            </label>
+            <label>CRP:
+                <input type="text" id="crp_psicologo" required>
+            </label>
+            <label>Chave Pix:
+                <input type="text" id="chave_pix" required>
+            </label>
+
+            <h2>Mensagens Automáticas</h2>
+            <label>Mensagem de Confirmação:
+                <textarea id="msg_confirmacao" rows="6" required></textarea>
+                <small>Variáveis disponíveis: {apelido}, {data_hora}, {chave_pix}</small>
+            </label>
+            <label>Mensagem de Envio do Link:
+                <textarea id="msg_link" rows="4" required></textarea>
+                <small>Variáveis disponíveis: {link_meet}</small>
+            </label>
+
+            <button type="submit" class="botao-verde">Salvar Configurações</button>
+        </form>
+    </div>
+
+    <script src="configuracoes.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script>
+      // ===============================================================
+      //       COLE A SUA CONFIGURAÇÃO DO FIREBASE (firebaseConfig) AQUI
+      // ===============================================================
+      const firebaseConfig = {
+    apiKey: "AIzaSyAgw7ffBCDw3QZFSBaQp-KFQAMe8WZPov8",
+    authDomain: "psi-entrelinhas.firebaseapp.com",
+    projectId: "psi-entrelinhas",
+    storageBucket: "psi-entrelinhas.firebasestorage.app",
+    messagingSenderId: "63675985445",
+    appId: "1:63675985445:web:f0effcb0f64639442b19cc"
+  };
+      // ===============================================================
+  
+      // Inicializa o Firebase e torna o 'db' acessível globalmente
+      try {
+        firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore();
+        console.log("Firebase inicializado com sucesso!");
+  
+        // Chama a função de carregamento da página específica
+        if (typeof carregarDadosIniciais === 'function') {
+          carregarDadosIniciais();
+        } else if (typeof carregarConfiguracoes === 'function') {
+          carregarConfiguracoes();
+        }
+      } catch (e) {
+        console.error("Erro CRÍTICO ao inicializar o Firebase:", e);
+        alert("Não foi possível inicializar o Firebase. Verifique se o objeto 'firebaseConfig' está correto no seu HTML.");
+      }
+    </script>
+    
+</body>
+</html>
