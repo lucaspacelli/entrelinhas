@@ -1,0 +1,130 @@
+/* Importa estilos base para consistência */
+@import url('style.css');
+
+/* Estilos específicos para a página Financeiro */
+.extrato-container {
+  flex: 1;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden; /* Para conter a tabela */
+  display: flex;
+  flex-direction: column;
+}
+
+.extrato-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.extrato-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 10;
+}
+
+.extrato-table th, .extrato-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.extrato-table th {
+  font-size: 14px;
+  color: #333;
+}
+
+.extrato-table td {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Filtros no cabeçalho da tabela */
+.filtro-th input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Scroll para o corpo da tabela */
+.table-wrapper {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Estilo para cards financeiros */
+.card-financeiro {
+  border-left: 5px solid teal; /* Azul padrão */
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 8px;
+}
+.card-financeiro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+.card-financeiro.em-aberto {
+  border-left-color: #fde68a; /* Vermelho para pendências */
+  border-radius: 8px;
+}
+.card-financeiro.selecionado {
+  border-width: 1px;
+  border-style: solid;
+  border-image: linear-gradient(45deg, teal,teal) 1;
+  border-radius: 8px;
+}
+
+.card-financeiro h3 { font-size: 16px; }
+.card-financeiro .valor { font-size: 20px; font-weight: normal; margin-top: 5px; }
+
+/* Garante que o container principal use flexbox para as colunas */
+#containerPrincipal {
+    display: flex;
+    gap: 20px; /* Espaçamento entre as colunas */
+    padding: 20px;
+    height: calc(100vh - 80px); /* Ajusta altura para header e footer se houver */
+    box-sizing: border-box;
+}
+
+/* Estilo para a coluna da esquerda (cards) */
+.left-column {
+    flex: 0 0 280px; /* Largura fixa para a coluna de cards, não cresce nem diminui */
+    display: flex;
+    flex-direction: column;
+    gap: 0px; /* Espaçamento entre os cards */
+    overflow-y: auto; /* Permite scroll se tiver muitos cards */
+    padding-right: 10px; /* Pequeno padding para o scrollbar não colar */
+}
+
+/* Estilo para o container do extrato (coluna da direita) */
+#extratoContainer {
+    flex: 1; /* Ocupa o restante do espaço disponível */
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilos de cards já presentes em style.css ou financeiro.css, só revisando */
+.cards-grid {
+    display: flex;
+    flex-direction: column; /* Para os cards ficarem um abaixo do outro na coluna */
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    min-height: 45px; /* Altura mínima para cards */
+}
